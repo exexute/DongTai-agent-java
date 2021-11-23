@@ -2,13 +2,12 @@ package com.secnium.iast.core.util;
 
 import com.secnium.iast.core.PropertyUtils;
 import com.secnium.iast.core.report.ErrorLogReport;
-import org.slf4j.Logger;
-
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -17,11 +16,17 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.GZIPOutputStream;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import org.slf4j.Logger;
 
 /**
  * @author dongzhiyong@huoxian.cn
  */
 public class HttpClientUtils {
+
     private static final String PROTOCOL_HTTPS = "https";
     private static final String REQUEST_HEADER_CONTENT_TYPE = "Content-Type";
     private static final String REQUEST_HEADER_CONTENT_ENCODING = "Content-Encoding";
@@ -31,7 +36,12 @@ public class HttpClientUtils {
     private static final String REQUEST_ENCODING_TYPE = "gzip";
     private static final String SSL_SIGNATURE = "TLS";
     public final static HostnameVerifier DO_NOT_VERIFY = new HttpClientHostnameVerifier();
-    private final static PropertyUtils PROPERTIES = PropertyUtils.getInstance();
+    private final static String OPENAPI_URL = PropertyUtils.getInstance().getBaseUrl();
+    private final static String AUTH_TOKEN = PropertyUtils.getInstance().getIastServerToken();
+    private final static boolean SUPPORT_DEBUG = PropertyUtils.getInstance().isDebug();
+    private final static boolean SUPPORT_PROXY = PropertyUtils.getInstance().isProxyEnable();
+    private final static String PROXY_HOST = PropertyUtils.getInstance().getProxyHost();
+    private final static int PROXY_PORT = PropertyUtils.getInstance().getProxyPort();
     private final static Proxy PROXY = loadProxy();
 
     private static final Logger logger = LogUtils.getLogger(HttpClientUtils.class);
@@ -39,9 +49,10 @@ public class HttpClientUtils {
     public static StringBuilder sendGet(String uri, String arg, String value) {
         try {
             if (arg != null && value != null) {
-                return sendRequest(HttpMethods.GET, PROPERTIES.getBaseUrl(), uri + "?" + arg + "=" + value, null, null, PROXY);
+                return sendRequest(HttpMethods.GET, uri + "?" + arg + "=" + value, null, null,
+                        PROXY);
             } else {
-                return sendRequest(HttpMethods.GET, PROPERTIES.getBaseUrl(), uri, null, null, PROXY);
+                return sendRequest(HttpMethods.GET, uri, null, null, PROXY);
             }
         } catch (Exception e) {
             return null;
@@ -50,8 +61,8 @@ public class HttpClientUtils {
 
     public static StringBuilder sendPost(String uri, String value) throws Exception {
         StringBuilder response;
-        response = sendRequest(HttpMethods.POST, PROPERTIES.getBaseUrl(), uri, value, null, PROXY);
-        if (PROPERTIES.isDebug()) {
+        response = sendRequest(HttpMethods.POST, uri, value, null, PROXY);
+        if (SUPPORT_DEBUG) {
             System.out.println("cn.huoxian.iast url is " + uri);
             System.out.println("cn.huoxian.iast resp is " + response.toString());
         }
@@ -59,30 +70,35 @@ public class HttpClientUtils {
     }
 
 
-    private static StringBuilder sendRequest(HttpMethods method, String baseUrl, String urlStr, String data, HashMap<String, String> headers, Proxy proxy) throws Exception {
+    private static StringBuilder sendRequest(HttpMethods method, String urlStr, String data,
+            HashMap<String, String> headers, Proxy proxy) throws Exception {
         HttpURLConnection connection = null;
         StringBuilder response = new StringBuilder();
         try {
             trustAllHosts();
-            URL url = new URL(baseUrl + urlStr);
+            URL url = new URL(OPENAPI_URL + urlStr);
             // 通过请求地址判断请求类型(http或者是https)
             if (PROTOCOL_HTTPS.equalsIgnoreCase(url.getProtocol())) {
-                HttpsURLConnection https = proxy == null ? (HttpsURLConnection) url.openConnection() : (HttpsURLConnection) url.openConnection(proxy);
+                HttpsURLConnection https = proxy == null ? (HttpsURLConnection) url.openConnection()
+                        : (HttpsURLConnection) url.openConnection(proxy);
                 https.setHostnameVerifier(DO_NOT_VERIFY);
                 connection = https;
             } else {
-                connection = proxy == null ? (HttpURLConnection) url.openConnection() : (HttpURLConnection) url.openConnection(proxy);
+                connection = proxy == null ? (HttpURLConnection) url.openConnection()
+                        : (HttpURLConnection) url.openConnection(proxy);
             }
 
             connection.setRequestMethod(method.name());
             if (HttpMethods.POST.equals(method)) {
                 connection.setRequestProperty(REQUEST_HEADER_CONTENT_TYPE, MEDIA_TYPE_APPLICATION_JSON);
                 connection.setRequestProperty(REQUEST_HEADER_CONTENT_ENCODING, REQUEST_ENCODING_TYPE);
-                connection.setRequestProperty(REQUEST_HEADER_USER_AGENT, "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.94 Safari/537.36 IAST-AGENT");
+                connection.setRequestProperty(REQUEST_HEADER_USER_AGENT,
+                        "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.94 Safari/537.36 IAST-AGENT");
             }
             //fixme:根据配置文件动态获取token和http请求头，用于后续自定义操作
             connection.setRequestProperty(REQUEST_HEADER_USER_AGENT, "DongTai-IAST-Agent");
-            connection.setRequestProperty(REQUEST_HEADER_TOKEN_KEY, "Token " + PropertyUtils.getInstance().getIastServerToken());
+            connection.setRequestProperty(REQUEST_HEADER_TOKEN_KEY,
+                    "Token " + AUTH_TOKEN);
             // 插入自定义的
             if (null != headers) {
                 for (Map.Entry<String, String> entry : headers.entrySet()) {
@@ -125,12 +141,13 @@ public class HttpClientUtils {
      */
     public static void downloadRemoteJar(String fileURI, String fileName) {
         try {
-            URL url = new URL(PROPERTIES.getBaseUrl().concat(fileURI));
-            HttpURLConnection connection = PROXY == null ? (HttpURLConnection) url.openConnection() : (HttpURLConnection) url.openConnection(PROXY);
+            URL url = new URL(OPENAPI_URL.concat(fileURI));
+            HttpURLConnection connection = PROXY == null ? (HttpURLConnection) url.openConnection()
+                    : (HttpURLConnection) url.openConnection(PROXY);
 
             connection.setRequestMethod("GET");
             connection.setRequestProperty("User-Agent", "DongTai-IAST-Agent");
-            connection.setRequestProperty("Authorization", "Token " + PROPERTIES.getIastServerToken());
+            connection.setRequestProperty("Authorization", "Token " + AUTH_TOKEN);
             connection.setUseCaches(false);
             connection.setDoOutput(true);
 
@@ -138,7 +155,7 @@ public class HttpClientUtils {
             final File classPath = new File(new File(fileName).getParent());
 
             if (!classPath.mkdirs() && !classPath.exists()) {
-                logger.info("Check or create local file cache path, path is {}",classPath);
+                logger.info("Check or create local file cache path, path is {}", classPath);
             }
             FileOutputStream fileOutputStream = new FileOutputStream(fileName);
             byte[] dataBuffer = new byte[1024];
@@ -146,9 +163,9 @@ public class HttpClientUtils {
             while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
                 fileOutputStream.write(dataBuffer, 0, bytesRead);
             }
-            logger.info("The remote file {} was successfully written to the local cache",fileURI);
+            logger.info("The remote file {} was successfully written to the local cache", fileURI);
         } catch (Exception ignore) {
-            logger.error("The remote file {} download failure, please check the iast-token",fileURI);
+            logger.error("The remote file {} download failure, please check the iast-token", fileURI);
         }
     }
 
@@ -157,13 +174,8 @@ public class HttpClientUtils {
      */
     private static Proxy loadProxy() {
         try {
-            if (PROPERTIES.isProxyEnable()) {
-                Proxy proxy;
-                proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(
-                        PROPERTIES.getProxyHost(),
-                        PROPERTIES.getProxyPort()
-                ));
-                return proxy;
+            if (SUPPORT_PROXY) {
+                return new Proxy(Proxy.Type.HTTP, new InetSocketAddress(PROXY_HOST, PROXY_PORT));
             }
         } catch (Throwable ignored) {
 

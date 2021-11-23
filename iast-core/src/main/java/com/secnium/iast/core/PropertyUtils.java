@@ -256,7 +256,8 @@ public class PropertyUtils {
 
     public int getProxyPort() {
         if (-1 == proxyPort) {
-            proxyPort = Integer.parseInt(System.getProperty("iast.proxy.port", cfg.getProperty("iast.proxy.port", "80")));
+            String port = System.getProperty("iast.proxy.port", cfg.getProperty("iast.proxy.port", "80"));
+            proxyPort = port == null || port.isEmpty()?80:Integer.parseInt(port);
         }
         return proxyPort;
     }

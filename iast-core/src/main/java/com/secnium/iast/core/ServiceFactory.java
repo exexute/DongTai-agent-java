@@ -5,7 +5,6 @@ import com.secnium.iast.core.replay.HttpRequestReplay;
 import com.secnium.iast.core.report.AgentQueueReport;
 import com.secnium.iast.core.report.MethodReportSender;
 import com.secnium.iast.core.report.ReportSender;
-
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -14,9 +13,11 @@ import java.util.concurrent.TimeUnit;
  * @author dongzhiyong@huoxian.cn
  */
 public class ServiceFactory {
+
     private static ServiceFactory INSTANCE;
-    private final long replayInterval;
-    private final long reportInterval;
+    private final long replayInterval = PropertyUtils.getInstance().getReplayInterval();
+    private final long reportInterval = PropertyUtils.getInstance().getReportInterval();
+    private final long heartbeatInterval = PropertyUtils.getInstance().getHeartBeatInterval();
     private final ScheduledExecutorService queueService;
     private final ScheduledExecutorService reportService;
     private final ScheduledExecutorService methodService;
@@ -38,14 +39,14 @@ public class ServiceFactory {
      * fixme 优化线程池创建
      */
     public ServiceFactory() {
-        assert null != PropertyUtils.getInstance();
-        PropertyUtils propertiesUtils = PropertyUtils.getInstance();
-        this.replayInterval = propertiesUtils.getReplayInterval();
-        this.reportInterval = propertiesUtils.getReportInterval();
-        this.queueService = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("dongtai-queue").build());
-        this.reportService = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("dongtai-report").build());
-        this.methodService = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("dongtai-method").build());
-        this.replayService = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("dongtai-replay").build());
+        this.queueService = Executors
+                .newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("dongtai-queue").build());
+        this.reportService = Executors
+                .newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("dongtai-report").build());
+        this.methodService = Executors
+                .newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("dongtai-method").build());
+        this.replayService = Executors
+                .newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("dongtai-replay").build());
     }
 
     public void init() {
@@ -56,7 +57,7 @@ public class ServiceFactory {
     }
 
     public void start() {
-        queueService.scheduleWithFixedDelay(agentQueueSender,0,PropertyUtils.getInstance().getHeartBeatInterval(),TimeUnit.SECONDS);
+        queueService.scheduleWithFixedDelay(agentQueueSender, 0, heartbeatInterval, TimeUnit.SECONDS);
         methodService.scheduleWithFixedDelay(methodReportSender, 0, reportInterval, TimeUnit.MILLISECONDS);
         reportService.scheduleWithFixedDelay(report, 0, reportInterval, TimeUnit.MILLISECONDS);
         replayService.scheduleWithFixedDelay(requestReplay, 0, replayInterval, TimeUnit.MILLISECONDS);

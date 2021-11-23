@@ -49,7 +49,6 @@ public class AgentEngine {
         long start = System.currentTimeMillis();
         logger.info("DongTai Engine is about to be installed, the installation mode is {}", mode);
         PropertyUtils propertiesUtils = PropertyUtils.getInstance(propertiesFilePath);
-//        AgentRegisterReport.send();
         EngineManager.setAgentId(agentId);
         AgentEngine agentEngine = AgentEngine.getInstance();
         assert agentEngine != null;

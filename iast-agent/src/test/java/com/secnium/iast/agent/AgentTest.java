@@ -14,7 +14,7 @@ public class AgentTest {
         RuntimeMXBean runtimeMXBean = ManagementFactory.getRuntimeMXBean();
         String pid = runtimeMXBean.getName().split("@")[0];
         try {
-            pid = "94008";
+            pid = "15582";
             AttachLauncher.attach(pid, "");
         } catch (Throwable e) {
             LogUtils.error("Start DongTai Agent failed, exception stack trace: ");

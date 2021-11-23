@@ -3,22 +3,19 @@ package com.secnium.iast.core.util;
 import com.secnium.iast.core.EngineManager;
 import com.secnium.iast.core.PropertyUtils;
 import com.secnium.iast.core.handler.models.MethodEvent;
-
 import java.util.Iterator;
 import java.util.Set;
 
 /**
- * 检测污点池中是否存在目标对象
- * 解决方案，
- * 1.将加入污点池的复杂对象，拆分为简单对象，后续直接检测
- * 2.检测时，将污点池中的复杂对象拆分出来
+ * 检测污点池中是否存在目标对象 解决方案， 1.将加入污点池的复杂对象，拆分为简单对象，后续直接检测 2.检测时，将污点池中的复杂对象拆分出来
  * <p>
  * 场景：污点池中数据的查询数多于插入数量
  *
  * @author dongzhiyong@huoxian.cn
  */
 public class TaintPoolUtils {
-    private static PropertyUtils properties = PropertyUtils.getInstance();
+
+    private static final boolean IS_NORMAL_MODE = PropertyUtils.getInstance().isNormalMode();
 
     public static boolean poolContains(Object obj, MethodEvent event) {
         if (obj == null) {
@@ -58,8 +55,7 @@ public class TaintPoolUtils {
         int hashcode = 0;
         // 检查是否
 
-
-        if (isString && properties.isNormalMode()) {
+        if (isString && IS_NORMAL_MODE) {
             Iterator<Object> iterator = taints.iterator();
             hashcode = System.identityHashCode(obj);
             while (iterator.hasNext()) {

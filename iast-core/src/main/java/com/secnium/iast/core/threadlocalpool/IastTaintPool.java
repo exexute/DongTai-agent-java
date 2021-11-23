@@ -3,7 +3,6 @@ package com.secnium.iast.core.threadlocalpool;
 import com.secnium.iast.core.EngineManager;
 import com.secnium.iast.core.PropertyUtils;
 import com.secnium.iast.core.handler.models.MethodEvent;
-
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -12,7 +11,8 @@ import java.util.Set;
  * @author dongzhiyong@huoxian.cn
  */
 public class IastTaintPool extends ThreadLocal<HashSet<Object>> {
-    private static final PropertyUtils PROPERTIES = PropertyUtils.getInstance();
+
+    private static final boolean IS_NORMAL_MODE = PropertyUtils.getInstance().isNormalMode();
 
     @Override
     protected HashSet<Object> initialValue() {
@@ -22,8 +22,7 @@ public class IastTaintPool extends ThreadLocal<HashSet<Object>> {
     /**
      * 将待加入污点池中的数据插入到污点池，其中：复杂数据结构需要拆分为简单的数据结构
      * <p>
-     * 检测类型，如果是复杂类型，将复杂类型转换为简单类型仅从保存
-     * source点 获取的数据，需要将复杂类型的数据转换为简单类型进行存储
+     * 检测类型，如果是复杂类型，将复杂类型转换为简单类型仅从保存 source点 获取的数据，需要将复杂类型的数据转换为简单类型进行存储
      * <p>
      * fixme: 后续补充所有类型
      *
@@ -36,7 +35,7 @@ public class IastTaintPool extends ThreadLocal<HashSet<Object>> {
             event.addTargetHash(obj.hashCode());
 
             String[] tempObjs = (String[]) obj;
-            if (PROPERTIES.isNormalMode()) {
+            if (IS_NORMAL_MODE) {
                 for (String tempObj : tempObjs) {
                     this.get().add(tempObj);
                     subHashCode = System.identityHashCode(tempObj);
@@ -70,14 +69,13 @@ public class IastTaintPool extends ThreadLocal<HashSet<Object>> {
             }
         } else {
             this.get().add(obj);
-            if (obj instanceof String && PROPERTIES.isNormalMode()) {
+            if (obj instanceof String && IS_NORMAL_MODE) {
                 subHashCode = System.identityHashCode(obj);
                 EngineManager.TAINT_HASH_CODES.get().add(subHashCode);
-                event.addTargetHash(subHashCode);
             } else {
                 subHashCode = obj.hashCode();
-                event.addTargetHash(subHashCode);
             }
+            event.addTargetHash(subHashCode);
 
         }
     }

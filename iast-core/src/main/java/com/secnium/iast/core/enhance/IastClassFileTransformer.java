@@ -11,7 +11,6 @@ import com.secnium.iast.core.enhance.plugins.PluginRegister;
 import com.secnium.iast.core.report.ErrorLogReport;
 import com.secnium.iast.core.util.AsmUtils;
 import com.secnium.iast.core.util.LogUtils;
-import com.secnium.iast.core.util.ObjectIDs;
 import com.secnium.iast.core.util.ThrowableUtils;
 import com.secnium.iast.core.util.matcher.ConfigMatcher;
 import java.io.File;
@@ -97,41 +96,42 @@ public class IastClassFileTransformer implements ClassFileTransformer {
             }
 
             // class hook
-            if (ConfigMatcher.isHookPoint(internalClassName, loader)) {
-                byte[] sourceCodeBak = new byte[srcByteCodeArray.length];
-                System.arraycopy(srcByteCodeArray, 0, sourceCodeBak, 0, srcByteCodeArray.length);
-                final ClassReader cr = new ClassReader(sourceCodeBak);
-                final int flags = cr.getAccess();
+            if (classBeingRedefined == null && !ConfigMatcher.isHookPoint(internalClassName, loader)) {
+                return null;
+            }
+            byte[] sourceCodeBak = new byte[srcByteCodeArray.length];
+            System.arraycopy(srcByteCodeArray, 0, sourceCodeBak, 0, srcByteCodeArray.length);
+            final ClassReader cr = new ClassReader(sourceCodeBak);
+            final int flags = cr.getAccess();
 
-                final String[] interfaces = cr.getInterfaces();
-                final String superName = cr.getSuperName();
-                final String className = cr.getClassName();
-                COMMON_UTILS.setLoader(loader);
-                COMMON_UTILS.saveAncestors(className, superName, interfaces);
-                HashSet<String> ancestors = COMMON_UTILS.getAncestors(className, superName, interfaces);
+            final String[] interfaces = cr.getInterfaces();
+            final String superName = cr.getSuperName();
+            final String className = cr.getClassName();
+            COMMON_UTILS.setLoader(loader);
+            COMMON_UTILS.saveAncestors(className, superName, interfaces);
+            HashSet<String> ancestors = COMMON_UTILS.getAncestors(className, superName, interfaces);
 
-                final ClassWriter cw = createClassWriter(loader, cr);
-                ClassVisitor cv = PLUGINS.initial(cw, IastContext.build(className, ancestors, interfaces,
-                        flags, loader == null, namespace));
+            final ClassWriter cw = createClassWriter(loader, cr);
+            ClassVisitor cv = PLUGINS.initial(cw, IastContext.build(className, ancestors, interfaces,
+                    flags, loader == null, namespace));
 
-                if (cv instanceof AbstractClassVisitor) {
-                    cr.accept(cv, ClassReader.EXPAND_FRAMES);
-                    AbstractClassVisitor dumpClassVisitor = (AbstractClassVisitor) cv;
-                    if (dumpClassVisitor.hasTransformed()) {
-                        transformerClasses.add(internalClassName);
-                        if (logger.isDebugEnabled() && null != clock) {
-                            clock.stop();
-                            logger.debug("conversion class {} is successful, and it takes {}ms.", internalClassName,
-                                    clock.getTime());
-                        }
-                        return dumpClassIfNecessary(cr.getClassName(), cw.toByteArray(), srcByteCodeArray);
-                    }
-                } else {
+            if (cv instanceof AbstractClassVisitor) {
+                cr.accept(cv, ClassReader.EXPAND_FRAMES);
+                AbstractClassVisitor dumpClassVisitor = (AbstractClassVisitor) cv;
+                if (dumpClassVisitor.hasTransformed()) {
+                    transformerClasses.add(internalClassName);
                     if (logger.isDebugEnabled() && null != clock) {
                         clock.stop();
-                        logger.debug("failed to convert the class {}, and it takes {} ms", internalClassName,
+                        logger.debug("conversion class {} is successful, and it takes {}ms.", internalClassName,
                                 clock.getTime());
                     }
+                    return dumpClassIfNecessary(cr.getClassName(), cw.toByteArray(), srcByteCodeArray);
+                }
+            } else {
+                if (logger.isDebugEnabled() && null != clock) {
+                    clock.stop();
+                    logger.debug("failed to convert the class {}, and it takes {} ms", internalClassName,
+                            clock.getTime());
                 }
             }
         } catch (Throwable cause) {
@@ -143,7 +143,7 @@ public class IastClassFileTransformer implements ClassFileTransformer {
             EngineManager.leaveTransform();
         }
 
-        return srcByteCodeArray;
+        return null;
     }
 
     /**

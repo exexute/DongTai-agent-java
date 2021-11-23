@@ -1,13 +1,12 @@
 package com.secnium.iast.agent;
 
+import com.secnium.iast.agent.util.LogUtils;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-
-import com.secnium.iast.agent.util.LogUtils;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -45,13 +44,13 @@ public class Agent {
                 attachArgs = mode;
 
                 String jdkVersion = getJdkVersion();
-                if ("1".equals(jdkVersion) && appendToolsPath()) {
-                    AttachLauncher.attach(pid, attachArgs);
-                    LogUtils.info("engine " + attachArgs + " successfully. pid: " + pid);
-                } else {
-                    AttachLauncher.attach(pid, attachArgs);
-                    LogUtils.info("engine " + attachArgs + " successfully. pid: " + pid);
+                if ("1".equals(jdkVersion)) {
+                    appendToolsPath();
                 }
+
+                AttachLauncher.attach(pid, attachArgs);
+                LogUtils.info("engine " + attachArgs + " successfully. pid: " + pid);
+
             } else {
                 formatter.printHelp("java -jar agent.jar", attachOptions, true);
             }
