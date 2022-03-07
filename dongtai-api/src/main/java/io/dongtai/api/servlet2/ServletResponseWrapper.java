@@ -18,7 +18,7 @@ public class ServletResponseWrapper extends HttpServletResponseWrapper implement
 
     public ServletResponseWrapper(HttpServletResponse response) {
         super(response);
-        response.addHeader("DongTai", "v1.3.1");
+        response.addHeader("DongTai", "v1.3.2.internal");
     }
 
     private String getLine() {
