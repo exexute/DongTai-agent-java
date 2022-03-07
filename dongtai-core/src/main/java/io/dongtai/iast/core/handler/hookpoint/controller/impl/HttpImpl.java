@@ -1,10 +1,9 @@
 package io.dongtai.iast.core.handler.hookpoint.controller.impl;
 
 import io.dongtai.iast.core.EngineManager;
-import io.dongtai.iast.core.service.ErrorLogReport;
-import io.dongtai.iast.core.utils.PropertyUtils;
 import io.dongtai.iast.core.handler.hookpoint.IastClassLoader;
 import io.dongtai.iast.core.handler.hookpoint.models.MethodEvent;
+import io.dongtai.iast.core.service.ErrorLogReport;
 import io.dongtai.iast.core.utils.HttpClientUtils;
 import io.dongtai.iast.core.utils.matcher.ConfigMatcher;
 import io.dongtai.log.DongTaiLog;
@@ -14,6 +13,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -122,14 +122,19 @@ public class HttpImpl {
 
     public static Map<String, Object> getRequestMeta(Object request)
             throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
-        Method methodOfRequestMeta = request.getClass().getDeclaredMethod("getRequestMeta");
-        return (Map<String, Object>) methodOfRequestMeta.invoke(request);
+        if (cloneRequestMethod != null) {
+            Method methodOfRequestMeta = request.getClass().getDeclaredMethod("getRequestMeta");
+            return (Map<String, Object>) methodOfRequestMeta.invoke(request);
+        }
+        return new HashMap<String, Object>();
     }
 
     public static String getPostBody(Object request) {
         try {
-            Method methodOfRequestMeta = request.getClass().getDeclaredMethod("getPostBody");
-            return (String) methodOfRequestMeta.invoke(request);
+            if (cloneRequestMethod != null) {
+                Method methodOfRequestMeta = request.getClass().getDeclaredMethod("getPostBody");
+                return (String) methodOfRequestMeta.invoke(request);
+            }
         } catch (NoSuchMethodException ignored) {
         } catch (IllegalAccessException ignored) {
         } catch (InvocationTargetException ignored) {
@@ -140,8 +145,10 @@ public class HttpImpl {
     public static Map<String, Object> getResponseMeta(Object response) {
         Method methodOfRequestMeta = null;
         try {
-            methodOfRequestMeta = response.getClass().getDeclaredMethod("getResponseMeta");
-            return (Map<String, Object>) methodOfRequestMeta.invoke(response);
+            if (cloneResponseMethod != null) {
+                methodOfRequestMeta = response.getClass().getDeclaredMethod("getResponseMeta");
+                return (Map<String, Object>) methodOfRequestMeta.invoke(response);
+            }
         } catch (NoSuchMethodException ignored) {
         } catch (IllegalAccessException ignored) {
         } catch (InvocationTargetException ignored) {

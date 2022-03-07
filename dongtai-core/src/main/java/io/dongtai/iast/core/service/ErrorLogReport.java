@@ -24,7 +24,6 @@ public class ErrorLogReport {
     }
 
     public static void sendErrorLog(Throwable t) {
-        t.printStackTrace();
         if (ENABLE_UPLOAD) {
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);

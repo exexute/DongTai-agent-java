@@ -4243,6 +4243,7 @@ com/caucho/server/dispatch/ServletInvocation
 com/caucho/server/webapp/AccessLogFilterChain
 com/caucho/server/webapp/WebAppFilterChain
 com/caucho/server/security/SecurityFilterChain
+com/caucho/server/webapp/DispatchFilterChain
 com/certicom/tls/TLSConnection
 com/certicom/tls/ciphersuite/CryptoNames
 com/certicom/tls/event/TLSHandshakeCompletedListener
