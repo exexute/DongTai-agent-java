@@ -1,6 +1,7 @@
 package io.dongtai.iast.core.handler.hookpoint.controller.impl;
 
 import io.dongtai.iast.core.EngineManager;
+import io.dongtai.iast.core.service.ErrorLogReport;
 import io.dongtai.iast.core.utils.PropertyUtils;
 import io.dongtai.iast.core.handler.hookpoint.IastClassLoader;
 import io.dongtai.iast.core.handler.hookpoint.models.MethodEvent;
@@ -53,9 +54,14 @@ public class HttpImpl {
                         .getDeclaredMethod("cloneResponse", Object.class, boolean.class);
             }
         } catch (MalformedURLException e) {
-            e.printStackTrace();
+            DongTaiLog.error("create classLoader failure [MalformedURLException], reason: {}", e.getMessage());
+            ErrorLogReport.sendErrorLog(e);
         } catch (NoSuchMethodException e) {
-            e.printStackTrace();
+            DongTaiLog.error("create classLoader failure [NoSuchMethodException], reason: {}", e.getMessage());
+            ErrorLogReport.sendErrorLog(e);
+        } catch (Exception e) {
+            DongTaiLog.error("create classLoader failure, reason: {}", e.getMessage());
+            ErrorLogReport.sendErrorLog(e);
         }
     }
 
@@ -64,8 +70,9 @@ public class HttpImpl {
             try {
                 cloneResponseMethod = CLASS_OF_SERVLET_PROXY
                         .getDeclaredMethod("cloneResponse", Object.class, boolean.class);
-            } catch (NoSuchMethodException e) {
-                e.printStackTrace();
+            } catch (Exception e) {
+                DongTaiLog.error("load response method failure, reason: {}", e.getMessage());
+                ErrorLogReport.sendErrorLog(e);
             }
         }
     }
@@ -80,15 +87,15 @@ public class HttpImpl {
             return null;
         }
         try {
-            if (cloneRequestMethod == null) {
-                createClassLoader(req);
+            createClassLoader(req);
+            if (cloneRequestMethod != null) {
+                return cloneRequestMethod.invoke(null, req, isJakarta);
             }
-            return cloneRequestMethod.invoke(null, req, isJakarta);
-        } catch (IllegalAccessException e) {
-            return req;
-        } catch (InvocationTargetException e) {
-            return req;
+        } catch (Exception e) {
+            DongTaiLog.info("clone request failure, reason: cloneRequestMethod is null");
+            ErrorLogReport.sendErrorLog(e);
         }
+        return req;
     }
 
     /**
@@ -102,15 +109,15 @@ public class HttpImpl {
             return null;
         }
         try {
-            if (cloneResponseMethod == null) {
-                loadCloneResponseMethod();
+            loadCloneResponseMethod();
+            if (cloneResponseMethod != null) {
+                return cloneResponseMethod.invoke(null, response, isJakarta);
             }
-            return cloneResponseMethod.invoke(null, response, isJakarta);
-        } catch (IllegalAccessException e) {
-            return response;
-        } catch (InvocationTargetException e) {
-            return response;
+        } catch (Exception e) {
+            DongTaiLog.info("clone request failure, reason: cloneRequestMethod is null");
+            ErrorLogReport.sendErrorLog(e);
         }
+        return response;
     }
 
     public static Map<String, Object> getRequestMeta(Object request)

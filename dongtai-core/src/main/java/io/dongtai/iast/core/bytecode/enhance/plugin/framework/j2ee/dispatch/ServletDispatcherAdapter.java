@@ -79,9 +79,12 @@ public class ServletDispatcherAdapter extends AbstractClassVisitor {
     }
 
     private boolean isServiceArgs(Type[] typeOfArgs) {
-        return typeOfArgs.length == 2 &&
-                HTTP_SERVLET_REQUEST.equals(typeOfArgs[0].getClassName()) &&
-                HTTP_SERVLET_RESPONSE.equals(typeOfArgs[1].getClassName());
+        String reqClassName = typeOfArgs[0].getClassName();
+        String resClassName = typeOfArgs[1].getClassName();
+        return typeOfArgs.length == 2 && (
+                (HTTP_SERVLET_REQUEST.equals(reqClassName) && HTTP_SERVLET_RESPONSE.equals(resClassName))
+                        || (SERVLET_REQUEST.equals(reqClassName) && SERVLET_RESPONSE.equals(resClassName))
+        );
     }
 
     private boolean isJakartaArgs(Type[] typeOfArgs) {

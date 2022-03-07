@@ -243,7 +243,11 @@ public class MethodEvent {
                     }
                 }
             } else {
-                sb.append(value.toString());
+                try {
+                    sb.append(value.toString());
+                } catch (Exception e) {
+                    sb.append(value.getClass().getName());
+                }
             }
         } catch (Exception e) {
             ErrorLogReport.sendErrorLog(e);

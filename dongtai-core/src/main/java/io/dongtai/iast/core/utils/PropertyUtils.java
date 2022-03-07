@@ -245,8 +245,12 @@ public class PropertyUtils {
     }
 
     public Integer getResponseLength() {
-        if(responseLength == null){
-            responseLength = Integer.parseInt(System.getProperty("dongtai.response.length", cfg.getProperty("dongtai.response.length","-1")));
+        if (responseLength == null) {
+            try {
+                responseLength = Integer.parseInt(System.getProperty("dongtai.response.length", cfg.getProperty("dongtai.response.length", "-1")));
+            } catch (NumberFormatException e) {
+                responseLength = -1;
+            }
         }
         return responseLength;
     }

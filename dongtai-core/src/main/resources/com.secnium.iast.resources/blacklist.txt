@@ -4239,6 +4239,10 @@ com/bea/xml/XmlUnsignedLong
 com/bea/xml/XmlUnsignedShort
 com/bea/xml/soap/SOAPArrayType
 com/bea/xml/soap/SchemaWSDLArrayType
+com/caucho/server/dispatch/ServletInvocation
+com/caucho/server/webapp/AccessLogFilterChain
+com/caucho/server/webapp/WebAppFilterChain
+com/caucho/server/security/SecurityFilterChain
 com/certicom/tls/TLSConnection
 com/certicom/tls/ciphersuite/CryptoNames
 com/certicom/tls/event/TLSHandshakeCompletedListener

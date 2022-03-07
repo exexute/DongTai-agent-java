@@ -168,8 +168,9 @@ public class IastClassFileTransformer implements ClassFileTransformer {
                     }
                 }
             }
-        } catch (
-                Throwable ignore) {
+        } catch (IllegalArgumentException e) {
+            DongTaiLog.error("transform class {} failure, reason: {}", internalClassName, e.getMessage());
+        } catch (Throwable ignore) {
         } finally {
             if (isRunning) {
                 EngineManager.turnOnLingzhi();
