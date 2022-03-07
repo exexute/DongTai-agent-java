@@ -85,7 +85,7 @@ final public class DispatchTechnologyPlugin implements DispatchPlugin {
         return null;
     }
 
-    public static class ClassVisit extends AbstractClassVisitor {
+    static class ClassVisit extends AbstractClassVisitor {
         private final Map<String, String> technologyMapDetail;
 
         ClassVisit(ClassVisitor classVisitor, IastContext context, Map<String, String> technologyMapDetail) {

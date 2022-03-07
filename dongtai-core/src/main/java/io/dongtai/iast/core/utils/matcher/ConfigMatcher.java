@@ -26,7 +26,18 @@ public class ConfigMatcher {
     private final Set<String> BLACKS_SET;
     private final String[] START_ARRAY;
     private final String[] END_ARRAY;
-    private final String[] DISABLE_EXT;
+    private final String[] DISABLE_EXT = new String[]{
+            ".js",
+            ".css",
+            ".jpg",
+            ".png",
+            ".gif",
+            ".woff",
+            ".woff2",
+            ".ico",
+            ".maps",
+            ".xml",
+    };
     private final AbstractMatcher INTERNAL_CLASS = new InternalClass();
     private final AbstractMatcher FRAMEWORK_CLASS = new FrameworkClass();
     private final AbstractMatcher SERVER_CLASS = new ServerClass();
@@ -46,7 +57,6 @@ public class ConfigMatcher {
         String blackListFuncFile = cfg.getBlackFunctionFilePath();
         String blackList = cfg.getBlackClassFilePath();
         String blackUrl = cfg.getBlackUrl();
-        String disableExtList = cfg.getBlackExtFilePath();
 
         Set<String>[] items = ConfigUtils.loadConfigFromFile(blackListFuncFile);
         BLACKS = items[0];
@@ -59,8 +69,6 @@ public class ConfigMatcher {
         START_ARRAY = items[1].toArray(new String[0]);
         END_ARRAY = items[2].toArray(new String[0]);
         BLACKS_SET = items[0];
-
-        DISABLE_EXT = ConfigUtils.loadExtConfigFromFile(disableExtList);
     }
 
     /**

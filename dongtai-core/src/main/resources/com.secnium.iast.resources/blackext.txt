@@ -1,1 +1,0 @@
-.js,.css,.htm,.html,.jpg,.png,.gif,.woff,.woff2,.ico,.maps,.xml

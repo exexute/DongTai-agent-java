@@ -23,6 +23,7 @@ import org.json.JSONObject;
  * @author dongzhiyong@huoxian.cn
  */
 public class GraphBuilder {
+    static boolean localModel = PropertyUtils.getInstance().isLocal();
 
     public static void buildAndReport(Object request, Object response) {
         List<GraphNode> nodeList = build();
@@ -50,18 +51,15 @@ public class GraphBuilder {
                             event.getCallerClass(),
                             event.getCallerMethod(),
                             event.getCallerLine(),
-                            event.object != null ? IastClassDiagram
-                                    .getFamilyFromClass(event.object.getClass().getName().replace("\\.", "/")) : null,
+                            event.object != null ? IastClassDiagram.getFamilyFromClass(event.object.getClass().getName().replace("\\.", "/")) : null,
                             event.getMatchClassName(),
                             event.getOriginClassName(),
                             event.getMethodName(),
                             event.getMethodDesc(),
-                            "",
-                            "",
                             event.getSourceHashes(),
                             event.getTargetHashes(),
-                            properties.isLocal() ? event.obj2String(event.inValue) : "",
-                            properties.isLocal() ? event.obj2String(event.outValue) : ""
+                            localModel && (event.inValue != null) ? MethodEvent.obj2String(event.inValue) : "",
+                            localModel && (event.outValue != null) ? MethodEvent.obj2String(event.outValue) : ""
                     )
             );
         }

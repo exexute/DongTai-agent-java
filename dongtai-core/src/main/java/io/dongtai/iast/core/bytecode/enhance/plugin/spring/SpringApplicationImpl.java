@@ -17,16 +17,25 @@ public class SpringApplicationImpl {
 
     private static IastClassLoader iastClassLoader;
     public static Method getAPI;
-    public static boolean isSend;
+    public static boolean finished;
+
+    public static boolean isFinished() {
+        return finished;
+    }
+
+    public static void setFinished() {
+        SpringApplicationImpl.finished = true;
+    }
 
     public static void getWebApplicationContext(MethodEvent event) {
-        if (!isSend) {
+        if (!isFinished()) {
             Object applicationContext = event.returnValue;
             createClassLoader(applicationContext);
             loadApplicationContext();
             GetApiThread getApiThread = new GetApiThread(applicationContext);
             getApiThread.start();
         }
+        setFinished();
     }
 
     private static void createClassLoader(Object applicationContext) {

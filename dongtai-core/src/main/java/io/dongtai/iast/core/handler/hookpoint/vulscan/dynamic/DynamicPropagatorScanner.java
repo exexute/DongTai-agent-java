@@ -83,7 +83,7 @@ public class DynamicPropagatorScanner implements IVulScan {
      */
     private boolean sinkSourceHitTaintPool(MethodEvent event, IastSinkModel sink) {
         boolean hitTaintPool = false;
-        if (isRedirectVul(sink.getType(), event.signature)) {
+        if (isRedirectVul(sink.getType(), event.getMethodDesc())) {
             String attribute = String.valueOf(event.argumentArray[0]);
             DongTaiLog.debug("add Header method, attribute name is {} ", attribute);
             if (attributeIsLocation(attribute)) {

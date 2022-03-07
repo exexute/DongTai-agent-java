@@ -30,7 +30,7 @@ public class PropagatorImpl {
 
     public static void solvePropagator(MethodEvent event, AtomicInteger invokeIdSequencer) {
         if (!EngineManager.TAINT_POOL.get().isEmpty()) {
-            IastPropagatorModel propagator = IastHookRuleModel.getPropagatorByMethodSignature(event.signature);
+            IastPropagatorModel propagator = IastHookRuleModel.getPropagatorByMethodSignature(event.getMethodDesc());
             if (propagator != null) {
                 auxiliaryPropagator(propagator, invokeIdSequencer, event);
             } else {

@@ -1,7 +1,6 @@
 package io.dongtai.iast.core.service;
 
 import io.dongtai.iast.core.handler.hookpoint.vulscan.ReportConstant;
-import io.dongtai.iast.core.service.ThreadPools;
 import org.json.JSONObject;
 
 /**

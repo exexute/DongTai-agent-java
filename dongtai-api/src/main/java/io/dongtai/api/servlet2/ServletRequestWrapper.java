@@ -1,6 +1,8 @@
 package io.dongtai.api.servlet2;
 
+import io.dongtai.api.ApiUtil;
 import io.dongtai.api.DongTaiRequest;
+
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -25,67 +27,68 @@ public class ServletRequestWrapper extends HttpServletRequestWrapper implements 
     public ServletRequestWrapper(HttpServletRequest request) {
         super(request);
         this.isPostMethod = "POST".equals(getMethod());
-        this.usingBody = isPostMethod && allowedContentType(request.getContentType());
+        this.usingBody = isPostMethod && ApiUtil.allowedContentType(request.getContentType());
     }
 
     @Override
     public ServletInputStream getInputStream() throws IOException {
-        if (this.usingBody) {
-            if (!isCachedBody) {
-                InputStream inputStream = super.getInputStream();
-                StringBuilder stringBuilder = new StringBuilder();
-                BufferedReader bufferedReader = null;
-                try {
-                    if (inputStream != null) {
-                        String ce = getCharacterEncoding();
-                        if (null == ce || ce.isEmpty()) {
-                            bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-                        } else {
-                            bufferedReader = new BufferedReader(new InputStreamReader(inputStream, ce));
-                        }
-                        char[] charBuffer = new char[128];
-                        int bytesRead;
-                        while ((bytesRead = bufferedReader.read(charBuffer)) > 0) {
-                            stringBuilder.append(charBuffer, 0, bytesRead);
-                        }
-                    }
-                    assert bufferedReader != null;
-                    bufferedReader.close();
-                } catch (IOException e) {
-                    // fixme: add logger for solve exception
-                    e.printStackTrace();
-                }
-                body = stringBuilder.toString();
-                isCachedBody = true;
-            }
-            final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(body.getBytes());
-
-            return new ServletInputStream() {
-                @Override
-                public boolean isFinished() {
-                    return false;
-                }
-
-                @Override
-                public boolean isReady() {
-                    return false;
-                }
-
-                /**
-                 * fixme: add method body
-                 * @param readListener
-                 */
-                @Override
-                public void setReadListener(ReadListener readListener) {
-                }
-
-                @Override
-                public int read() {
-                    return byteArrayInputStream.read();
-                }
-            };
+        if (!this.usingBody) {
+            return super.getInputStream();
         }
-        return super.getInputStream();
+
+        if (!isCachedBody) {
+            InputStream inputStream = super.getInputStream();
+            StringBuilder stringBuilder = new StringBuilder();
+            BufferedReader bufferedReader = null;
+            try {
+                if (inputStream != null) {
+                    String ce = getCharacterEncoding();
+                    if (null == ce || ce.isEmpty()) {
+                        bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+                    } else {
+                        bufferedReader = new BufferedReader(new InputStreamReader(inputStream, ce));
+                    }
+                    char[] charBuffer = new char[128];
+                    int bytesRead;
+                    while ((bytesRead = bufferedReader.read(charBuffer)) > 0) {
+                        stringBuilder.append(charBuffer, 0, bytesRead);
+                    }
+                }
+                assert bufferedReader != null;
+                bufferedReader.close();
+            } catch (IOException e) {
+                // fixme: add logger for solve exception
+                e.printStackTrace();
+            }
+            body = stringBuilder.toString();
+            isCachedBody = true;
+        }
+        final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(body.getBytes());
+
+        return new ServletInputStream() {
+            @Override
+            public boolean isFinished() {
+                return false;
+            }
+
+            @Override
+            public boolean isReady() {
+                return false;
+            }
+
+            /**
+             * fixme: add method body
+             * @param readListener
+             */
+            @Override
+            public void setReadListener(ReadListener readListener) {
+            }
+
+            @Override
+            public int read() {
+                return byteArrayInputStream.read();
+            }
+        };
     }
 
     @Override
@@ -120,7 +123,7 @@ public class ServletRequestWrapper extends HttpServletRequestWrapper implements 
 
     public Map<String, String> getHeaders() {
         Enumeration<?> headerNames = this.getHeaderNames();
-        Map<String, String> headers = new HashMap<>(32);
+        Map<String, String> headers = new HashMap<String, String>(32);
         while (headerNames.hasMoreElements()) {
             String name = (String) headerNames.nextElement();
             String value = this.getHeader(name);

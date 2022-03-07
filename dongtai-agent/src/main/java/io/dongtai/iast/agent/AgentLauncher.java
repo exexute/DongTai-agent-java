@@ -24,10 +24,6 @@ public class AgentLauncher {
          * fix bug: agent use sun.net.http, then allowRestrictedHeaders is false, so some custom server has wrong
          */
         System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
-        /**
-         * fix bug: java.lang.ClassCastException: weblogic.net.http.SOAPHttpsURLConnection cannot be cast to javax.net.ssl.HttpsURLConnection
-         */
-        System.setProperty("UseSunHttpHandler", "true");
     }
 
     /**

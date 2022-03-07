@@ -3,6 +3,7 @@ package io.dongtai.iast.core.handler.hookpoint.controller.impl;
 import io.dongtai.iast.core.EngineManager;
 import io.dongtai.iast.core.handler.hookpoint.models.MethodEvent;
 import io.dongtai.iast.core.utils.StackUtils;
+
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -65,7 +66,15 @@ public class SourceImpl {
                 }
 
                 Class<?> returnType = method.getReturnType();
-                if (returnType == Integer.class ||
+                if (returnType == int.class ||
+                        returnType == boolean.class ||
+                        returnType == long.class ||
+                        returnType == char.class ||
+                        returnType == double.class ||
+                        returnType == float.class ||
+                        returnType == byte.class ||
+                        returnType == void.class ||
+                        returnType == Integer.class ||
                         returnType == Boolean.class ||
                         returnType == Long.class ||
                         returnType == Character.class ||

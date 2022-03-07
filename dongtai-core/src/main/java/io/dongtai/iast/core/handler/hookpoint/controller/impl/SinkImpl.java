@@ -26,7 +26,7 @@ public class SinkImpl {
      */
     public static void solveSink(MethodEvent event) {
         Asserts.NOT_NULL("method.event", event);
-        IastSinkModel sink = IastHookRuleModel.getSinkByMethodSignature(event.signature);
+        IastSinkModel sink = IastHookRuleModel.getSinkByMethodSignature(event.getMethodDesc());
         Asserts.NOT_NULL("sink", sink);
 
         String sinkType = sink.getType();

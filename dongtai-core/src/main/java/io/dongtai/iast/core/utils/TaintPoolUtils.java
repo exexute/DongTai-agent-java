@@ -3,6 +3,7 @@ package io.dongtai.iast.core.utils;
 import io.dongtai.iast.core.EngineManager;
 import io.dongtai.iast.core.utils.PropertyUtils;
 import io.dongtai.iast.core.handler.hookpoint.models.MethodEvent;
+
 import java.util.Iterator;
 import java.util.Set;
 
@@ -62,6 +63,11 @@ public class TaintPoolUtils {
         // 检查是否
 
         if (isString && PropertyUtils.getInstance().isNormalMode()) {
+            // todo: 假设，字符串可以命中 TAINT_HASH_CODES 的前提，是已经命中 TAINT_POOL，则可以通过 TAINT_POOL 判断，减少后续的判断次数
+            if (!taints.contains(obj)) {
+                return false;
+            }
+
             Iterator<Object> iterator = taints.iterator();
             hashcode = System.identityHashCode(obj);
             while (iterator.hasNext()) {
@@ -69,6 +75,7 @@ public class TaintPoolUtils {
                     Object value = iterator.next();
                     if (obj.equals(value)) {
                         // 检查当前污点的hashcode是否在hashcode池中，如果在，则标记传播
+                        // fixme: 字符串匹配次数太多导致
                         if (EngineManager.TAINT_HASH_CODES.get().contains(hashcode)) {
                             event.addSourceHash(hashcode);
                             return true;

@@ -2,6 +2,7 @@ package io.dongtai.iast.core.handler.hookpoint.api;
 
 import io.dongtai.iast.core.bytecode.enhance.plugin.spring.SpringApplicationImpl;
 import io.dongtai.log.DongTaiLog;
+
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
@@ -23,8 +24,6 @@ public class GetApiThread extends Thread {
             DongTaiLog.error(e);
         } catch (InvocationTargetException e) {
             DongTaiLog.error(e);
-        } finally {
-            SpringApplicationImpl.isSend = true;
         }
     }
 

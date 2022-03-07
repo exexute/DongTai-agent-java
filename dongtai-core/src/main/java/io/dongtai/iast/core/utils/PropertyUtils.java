@@ -129,10 +129,6 @@ public class PropertyUtils {
         return "com.secnium.iast.resources/blackurl.txt";
     }
 
-    public String getBlackExtFilePath() {
-        return "com.secnium.iast.resources/blackext.txt";
-    }
-
     public String getDumpClassPath() {
         if (null == iastDumpPath) {
             iastDumpPath = System.getProperty("iast.dump.class.path", cfg.getProperty("iast.dump.class.path"));

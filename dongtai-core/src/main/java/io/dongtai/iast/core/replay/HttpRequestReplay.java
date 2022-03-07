@@ -1,10 +1,12 @@
 package io.dongtai.iast.core.replay;
 
 import io.dongtai.iast.core.handler.hookpoint.models.IastReplayModel;
+import io.dongtai.iast.core.service.ErrorLogReport;
 import io.dongtai.iast.core.utils.HttpClientHostnameVerifier;
 import io.dongtai.iast.core.utils.HttpClientUtils;
 import io.dongtai.iast.core.utils.HttpMethods;
 import io.dongtai.iast.core.utils.base64.Base64Decoder;
+import io.dongtai.log.DongTaiLog;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -57,7 +59,8 @@ public class HttpRequestReplay implements Runnable {
                 sendRequest(replayModel.getRequestMethod(), url, replayModel.getRequestBody(), headers);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            DongTaiLog.error("request replay failed. reason: {}", e.getMessage());
+            ErrorLogReport.sendErrorLog(e);
         }
     }
 

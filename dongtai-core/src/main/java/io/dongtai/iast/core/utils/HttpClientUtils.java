@@ -67,7 +67,7 @@ public class HttpClientUtils {
         StringBuilder response = new StringBuilder();
         try {
             trustAllHosts();
-            URL url = new URL(baseUrl + urlStr);
+            URL url = new URL(null, baseUrl + urlStr, baseUrl.toLowerCase().startsWith("https://") ? new sun.net.www.protocol.https.Handler() : new sun.net.www.protocol.http.Handler());
             // 通过请求地址判断请求类型(http或者是https)
             if (PROTOCOL_HTTPS.equalsIgnoreCase(url.getProtocol())) {
                 HttpsURLConnection https = proxy == null ? (HttpsURLConnection) url.openConnection()

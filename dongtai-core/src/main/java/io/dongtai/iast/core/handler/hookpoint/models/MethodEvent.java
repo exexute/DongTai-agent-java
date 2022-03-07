@@ -59,7 +59,7 @@ public class MethodEvent {
     }
 
     /**
-     * 获取触发调用事件的方法签名
+     * 获取触发调用事件的方法签名，fixme: 该字段是否必须？
      */
     private final String methodDesc;
 
@@ -172,7 +172,6 @@ public class MethodEvent {
                        final String matchClassName,
                        final String methodName,
                        final String methodDesc,
-                       final String signature,
                        final Object object,
                        final Object[] argumentArray,
                        final Object returnValue,
@@ -185,7 +184,6 @@ public class MethodEvent {
         this.originClassName = originClassName;
         this.methodName = methodName;
         this.methodDesc = methodDesc;
-        this.signature = signature;
         this.object = object;
         this.argumentArray = argumentArray;
         this.returnValue = returnValue;
@@ -226,65 +224,31 @@ public class MethodEvent {
         this.invokeId = invokeId;
     }
 
-    public String obj2String(Object value) {
+    public static String obj2String(Object value) {
         StringBuilder sb = new StringBuilder();
         try {
-            sb.append(value.toString());
+            // 判断是否是基本类型的数组，基本类型的数组无法类型转换为Object[]，导致java.lang.ClassCastException异常
+            if (value.getClass().isArray() && !value.getClass().getComponentType().isPrimitive()) {
+                Object[] taints = (Object[]) value;
+                for (Object taint : taints) {
+                    if (taint != null) {
+                        if (taint.getClass().isArray() && !taint.getClass().getComponentType().isPrimitive()) {
+                            Object[] subTaints = (Object[]) taint;
+                            for (Object subTaint : subTaints) {
+                                sb.append(subTaint.toString()).append(" ");
+                            }
+                        } else {
+                            sb.append(taint.toString()).append(" ");
+                        }
+                    }
+                }
+            } else {
+                sb.append(value.toString());
+            }
         } catch (Exception e) {
-            sb.append("CustomObjectValue");
+            ErrorLogReport.sendErrorLog(e);
         }
-        return sb.toString();
-//        if (null == value) {
-//            return "";
-//        }
-//        try {
-//            // 判断是否是基本类型的数组，基本类型的数组无法类型转换为Object[]，导致java.lang.ClassCastException异常
-//            if (value.getClass().isArray() && !value.getClass().getComponentType().isPrimitive()) {
-//                Object[] taints = (Object[]) value;
-//                for (Object taint : taints) {
-//                    if (taint != null) {
-//                        if (taint.getClass().isArray() && !taint.getClass().getComponentType().isPrimitive()) {
-//                            Object[] subTaints = (Object[]) taint;
-//                            for (Object subTaint : subTaints) {
-//                                sb.append(subTaint.toString()).append(" ");
-//                            }
-//                        } else {
-//                            sb.append(taint.toString()).append(" ");
-//                        }
-//                    }
-//                }
-//            } else {
-//                sb.append(value.toString());
-//            }
-//        } catch (Exception e) {
-//            ErrorLogReport.sendErrorLog(e);
-//        }
-//        return sb.toString().trim();
-    }
-
-    @Override
-    public String toString() {
-        return "MethodEvent{" +
-                "processId=" + processId +
-                ", invokeId=" + invokeId +
-                ", isStatic=" + isStatic +
-                ", javaClassName='" + matchClassName + '\'' +
-                ", javaMethodName='" + methodName + '\'' +
-                ", javaMethodDesc='" + methodDesc + '\'' +
-                ", object=" + object +
-                ", argumentArray=" + Arrays.toString(argumentArray) +
-                ", returnValue=" + returnValue +
-                ", inValue=" + inValue +
-                ", outValue=" + outValue +
-                ", signature='" + signature + '\'' +
-                ", subEvent=" + subEvent +
-                ", leave=" + leave +
-                ", source=" + source +
-                ", auxiliary=" + auxiliary +
-                ", condition='" + condition + '\'' +
-                ", callStack=" + Arrays.toString(callStacks) +
-                ", framework='" + framework + '\'' +
-                '}';
+        return sb.toString().trim();
     }
 
     public String getCallerClass() {

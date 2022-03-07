@@ -7,8 +7,11 @@ import io.dongtai.iast.core.bytecode.enhance.plugin.core.DispatchClassPlugin;
 import io.dongtai.iast.core.bytecode.enhance.plugin.framework.dubbo.DispatchDubbo;
 import io.dongtai.iast.core.bytecode.enhance.plugin.framework.j2ee.dispatch.DispatchJ2ee;
 import io.dongtai.iast.core.bytecode.enhance.plugin.hardcoded.DispatchHardcodedPlugin;
+
 import java.util.ArrayList;
 import java.util.List;
+
+import io.dongtai.iast.core.bytecode.enhance.plugin.thread.DispatchThreadPlugin;
 import org.objectweb.asm.ClassVisitor;
 
 /**
@@ -30,7 +33,7 @@ public class PluginRegister {
         this.plugins.add(new DispatchDubbo());
         //PLUGINS.add(new DispatchSpringAutoBinding());
         this.plugins.add(new DispatchClassPlugin());
-        //PLUGINS.add()
+        this.plugins.add(new DispatchThreadPlugin());
     }
 
     public ClassVisitor initial(ClassVisitor classVisitor, IastContext context) {

@@ -77,14 +77,6 @@ public class GraphNode {
      */
     private final String signature;
     /**
-     * 当前方法的参数列表
-     */
-    private final String args;
-    /**
-     * 当前方法的返回值对应的类名称
-     */
-    private final String retClassName;
-    /**
      * 来源污点hash
      */
     private final List<Integer> sourceHash;
@@ -103,8 +95,6 @@ public class GraphNode {
                      String originClassName,
                      String methodName,
                      String signature,
-                     String args,
-                     String retClassName,
                      List<Integer> sourceHash,
                      List<Integer> targetHash,
                      String sourceValues,
@@ -120,8 +110,6 @@ public class GraphNode {
         this.originClassName = originClassName;
         this.methodName = methodName;
         this.signature = signature;
-        this.args = args;
-        this.retClassName = retClassName;
         this.sourceHash = sourceHash;
         this.targetHash = targetHash;
         this.sourceValues = sourceValues;
@@ -144,8 +132,6 @@ public class GraphNode {
         value.put("className", matchClassName);
         value.put("methodName", methodName);
         value.put("signature", signature);
-        value.put("args", args);
-        value.put("retClassName", retClassName);
         value.put("sourceHash", sourceHashArray);
         value.put("sourceValues", sourceValues);
         value.put("targetHash", targetHashArray);

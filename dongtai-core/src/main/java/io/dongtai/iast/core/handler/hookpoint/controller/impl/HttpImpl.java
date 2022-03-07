@@ -29,7 +29,7 @@ public class HttpImpl {
     public static File IAST_REQUEST_JAR_PACKAGE;
 
     static {
-        IAST_REQUEST_JAR_PACKAGE = new File(System.getProperty("java.io.tmpdir") + File.separator + "dongtai-api.jar");
+        IAST_REQUEST_JAR_PACKAGE = new File(System.getProperty("java.io.tmpdir") + File.separator + "iast" + File.separator + "dongtai-api.jar");
         if (!IAST_REQUEST_JAR_PACKAGE.exists()) {
             HttpClientUtils.downloadRemoteJar("/api/v1/engine/download?engineName=dongtai-api", IAST_REQUEST_JAR_PACKAGE.getAbsolutePath());
         }
@@ -167,7 +167,7 @@ public class HttpImpl {
 
         if (DongTaiLog.isDebugEnabled()) {
             DongTaiLog.debug("HTTP Request:{} {} from: {}", requestMeta.get("method"), requestMeta.get("requestURI"),
-                    event.signature);
+                    event.getMethodDesc());
         }
     }
 

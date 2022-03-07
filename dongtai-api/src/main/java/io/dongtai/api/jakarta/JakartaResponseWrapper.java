@@ -71,7 +71,6 @@ public class JakartaResponseWrapper extends HttpServletResponseWrapper implement
     @Override
     public byte[] getResponseData() {
         try {
-            flushBuffer();
             if (copier != null) {
                 return copier.getCopy();
             }

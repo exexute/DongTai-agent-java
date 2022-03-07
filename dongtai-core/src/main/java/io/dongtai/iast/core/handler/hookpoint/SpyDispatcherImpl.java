@@ -334,15 +334,17 @@ public class SpyDispatcherImpl implements SpyDispatcher {
                 EngineManager.turnOffLingzhi();
 
                 if (HookType.SPRINGAPPLICATION.equals(hookType)) {
-                    MethodEvent event = new MethodEvent(0, -1, className, matchClassName, methodName,
-                            methodSign, methodSign, instance, argumentArray, retValue, framework, isStatic, null);
-                    SpringApplicationImpl.getWebApplicationContext(event);
+                    if (!SpringApplicationImpl.isFinished()) {
+                        MethodEvent event = new MethodEvent(0, -1, className, matchClassName, methodName,
+                                methodSign, instance, argumentArray, retValue, framework, isStatic, null);
+                        SpringApplicationImpl.getWebApplicationContext(event);
+                    }
                 } else {
                     boolean isEnterEntryPoint = EngineManager.isEnterHttp() || EngineManager.isFirstLevelDubbo();
                     boolean isEntryPointMethod = HookType.HTTP.equals(hookType) || HookType.DUBBO.equals(hookType);
                     if (isEnterEntryPoint || isEntryPointMethod) {
                         MethodEvent event = new MethodEvent(0, -1, className, matchClassName, methodName,
-                                methodSign, methodSign, instance, argumentArray, retValue, framework, isStatic, null);
+                                methodSign, instance, argumentArray, retValue, framework, isStatic, null);
                         if (HookType.HTTP.equals(hookType)) {
                             HttpImpl.solveHttp(event);
                         } else if (HookType.DUBBO.equals(hookType)) {
