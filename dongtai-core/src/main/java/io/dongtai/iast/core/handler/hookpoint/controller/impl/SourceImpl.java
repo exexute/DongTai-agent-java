@@ -2,6 +2,7 @@ package io.dongtai.iast.core.handler.hookpoint.controller.impl;
 
 import io.dongtai.iast.core.EngineManager;
 import io.dongtai.iast.core.handler.hookpoint.models.MethodEvent;
+import io.dongtai.iast.core.handler.trace.Tracer;
 import io.dongtai.iast.core.utils.StackUtils;
 
 import java.lang.reflect.Method;
@@ -38,8 +39,8 @@ public class SourceImpl {
 
             if (isNotEmpty(event.returnValue)) {
                 handlerCustomModel(event);
-                EngineManager.TRACK_MAP.addTrackMethod(invokeId, event);
-                EngineManager.TAINT_POOL.addTaintToPool(event.returnValue, event, true);
+                Tracer.getContext().getTraceMethodMap().put(invokeId, event);
+                Tracer.getContext().addTaintToPool(event.returnValue, event, true);
             }
         }
     }
@@ -90,7 +91,7 @@ public class SourceImpl {
                 if (!isNotEmpty(itemValue)) {
                     continue;
                 }
-                EngineManager.TAINT_POOL.addTaintToPool(itemValue, event, true);
+                Tracer.getContext().addTaintToPool(itemValue, event, true);
             }
 
         } catch (Throwable t) {

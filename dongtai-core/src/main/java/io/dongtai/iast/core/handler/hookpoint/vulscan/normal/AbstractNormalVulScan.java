@@ -3,11 +3,14 @@ package io.dongtai.iast.core.handler.hookpoint.vulscan.normal;
 import io.dongtai.iast.core.EngineManager;
 import io.dongtai.iast.core.handler.hookpoint.vulscan.IVulScan;
 import io.dongtai.iast.core.handler.hookpoint.vulscan.ReportConstant;
+import io.dongtai.iast.core.handler.trace.Tracer;
 import io.dongtai.iast.core.service.ThreadPools;
 import io.dongtai.iast.core.utils.Constants;
 import io.dongtai.iast.core.utils.StackUtils;
 import io.dongtai.iast.core.utils.base64.Base64Encoder;
+
 import java.util.Map;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -21,7 +24,7 @@ public abstract class AbstractNormalVulScan implements IVulScan {
      * @param vulType vulnerability
      */
     public void sendReport(StackTraceElement[] stacks, String vulType) {
-        Map<String, Object> requestMeta = EngineManager.REQUEST_CONTEXT.get();
+        Map<String, Object> requestMeta = Tracer.getContext().getRequestMeta();
         JSONObject report = new JSONObject();
         JSONObject detail = new JSONObject();
         JSONArray vulStacks = new JSONArray();

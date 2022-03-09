@@ -5,6 +5,7 @@ import io.dongtai.iast.core.handler.hookpoint.models.IastHookRuleModel;
 import io.dongtai.iast.core.handler.hookpoint.models.IastPropagatorModel;
 import io.dongtai.iast.core.handler.hookpoint.models.MethodEvent;
 import io.dongtai.iast.core.handler.hookpoint.vulscan.dynamic.TrackUtils;
+import io.dongtai.iast.core.handler.trace.Tracer;
 import io.dongtai.iast.core.utils.StackUtils;
 import io.dongtai.iast.core.utils.TaintPoolUtils;
 
@@ -29,7 +30,7 @@ public class PropagatorImpl {
     private static final int STACK_DEPTH = 11;
 
     public static void solvePropagator(MethodEvent event, AtomicInteger invokeIdSequencer) {
-        if (!EngineManager.TAINT_POOL.get().isEmpty()) {
+        if (!Tracer.getContext().getMethodTaintPool().isEmpty()) {
             IastPropagatorModel propagator = IastHookRuleModel.getPropagatorByMethodSignature(event.getMethodDesc());
             if (propagator != null) {
                 auxiliaryPropagator(propagator, invokeIdSequencer, event);
@@ -44,7 +45,7 @@ public class PropagatorImpl {
         event.setCallStacks(StackUtils.createCallStack(STACK_DEPTH));
         int invokeId = invokeIdSequencer.getAndIncrement();
         event.setInvokeId(invokeId);
-        EngineManager.TRACK_MAP.get().put(invokeId, event);
+        Tracer.getContext().getTraceMethodMap().put(invokeId, event);
     }
 
     private static void auxiliaryPropagator(IastPropagatorModel propagator, AtomicInteger invokeIdSequencer, MethodEvent event) {
@@ -137,14 +138,14 @@ public class PropagatorImpl {
             }
         }
         if (isNotEmpty(event.outValue)) {
-            EngineManager.TAINT_POOL.addTaintToPool(event.outValue, event, false);
+            Tracer.getContext().addTaintToPool(event.outValue, event, false);
         }
     }
 
     private static void autoPropagator(AtomicInteger invokeIdSequence, MethodEvent event) {
         // 处理自动传播问题
         // 检查污点池，判断是否存在命中的污点
-        Set<Object> pools = EngineManager.TAINT_POOL.get();
+        Set<Object> pools = Tracer.getContext().getMethodTaintPool();
         for (Object taintValue : pools) {
             if (TrackUtils.smartEventMatchAndSetTaint(taintValue, event)) {
                 // 将event.outValue加入污点池

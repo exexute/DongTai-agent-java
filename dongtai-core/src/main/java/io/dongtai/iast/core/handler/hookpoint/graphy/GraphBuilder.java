@@ -1,6 +1,7 @@
 package io.dongtai.iast.core.handler.hookpoint.graphy;
 
 import io.dongtai.iast.core.EngineManager;
+import io.dongtai.iast.core.handler.trace.Tracer;
 import io.dongtai.iast.core.utils.PropertyUtils;
 import io.dongtai.iast.core.bytecode.enhance.IastClassDiagram;
 import io.dongtai.iast.core.handler.hookpoint.controller.impl.HttpImpl;
@@ -37,9 +38,8 @@ public class GraphBuilder {
      * @return 污点方法列表
      */
     public static List<GraphNode> build() {
-        PropertyUtils properties = PropertyUtils.getInstance();
         List<GraphNode> nodeList = new ArrayList<GraphNode>();
-        Map<Integer, MethodEvent> taintMethodPool = EngineManager.TRACK_MAP.get();
+        Map<Integer, MethodEvent> taintMethodPool = Tracer.getContext().getTraceMethodMap();
 
         MethodEvent event = null;
         for (Map.Entry<Integer, MethodEvent> entry : taintMethodPool.entrySet()) {
@@ -67,7 +67,7 @@ public class GraphBuilder {
     }
 
     public static String convertToReport(List<GraphNode> nodeList, Object request, Object response) {
-        Map<String, Object> requestMeta = EngineManager.REQUEST_CONTEXT.get();
+        Map<String, Object> requestMeta = Tracer.getContext().getRequestMeta();
         Map<String, Object> responseMeta = response == null ? null : HttpImpl.getResponseMeta(response);
         JSONObject report = new JSONObject();
         JSONObject detail = new JSONObject();

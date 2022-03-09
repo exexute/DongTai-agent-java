@@ -6,9 +6,11 @@ import io.dongtai.iast.core.handler.hookpoint.SpyDispatcherImpl;
 import io.dongtai.iast.core.handler.hookpoint.models.IastSinkModel;
 import io.dongtai.iast.core.handler.hookpoint.models.MethodEvent;
 import io.dongtai.iast.core.handler.hookpoint.vulscan.IVulScan;
+import io.dongtai.iast.core.handler.trace.Tracer;
 import io.dongtai.iast.core.utils.StackUtils;
 import io.dongtai.iast.core.utils.TaintPoolUtils;
 import io.dongtai.log.DongTaiLog;
+
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -59,7 +61,7 @@ public class DynamicPropagatorScanner implements IVulScan {
             event.setCallStacks(StackUtils.createCallStack(11));
             int invokeId = SpyDispatcherImpl.INVOKE_ID_SEQUENCER.getAndIncrement();
             event.setInvokeId(invokeId);
-            EngineManager.TRACK_MAP.addTrackMethod(invokeId, event);
+            Tracer.getContext().getTraceMethodMap().put(invokeId, event);
         }
     }
 

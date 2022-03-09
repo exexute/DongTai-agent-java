@@ -3,7 +3,10 @@ package io.dongtai.iast.core.handler.hookpoint.controller.impl;
 
 import io.dongtai.iast.core.EngineManager;
 import io.dongtai.iast.core.handler.hookpoint.models.MethodEvent;
+import io.dongtai.iast.core.handler.trace.TraceContext;
+import io.dongtai.iast.core.handler.trace.Tracer;
 import io.dongtai.iast.core.utils.StackUtils;
+
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.List;
@@ -22,10 +25,15 @@ public class DubboImpl {
         Object invoker = event.argumentArray[0];
         Object invocation = event.argumentArray[1];
         String dubboService = getUrl(invoker);
-        Map<String, String> attachments = getAttachments(invocation);
-        EngineManager.enterDubboEntry(dubboService, attachments);
+        Map<String, Object> attachments = getAttachments(invocation);
+        if (attachments == null) {
+            return;
+        }
+        attachments.put("dubboService", dubboService);
+        Tracer.start(attachments);
+        TraceContext context = Tracer.getContext();
 
-        if (EngineManager.isEnterHttp()) {
+        if (context.isInEntry()) {
             return;
         }
 
@@ -48,8 +56,9 @@ public class DubboImpl {
                 event.outValue = verifiedArguments;
 
                 SourceImpl.handlerCustomModel(event);
-                EngineManager.TRACK_MAP.addTrackMethod(invokeId, event);
-                EngineManager.TAINT_POOL.addTaintToPool(verifiedArguments, event, true);
+                context.getTraceMethodMap().put(invokeId, event);
+                context.addTaintToPool(verifiedArguments, event, true);
+                // fixme: 维护 source 状态
             }
         }
     }
@@ -77,11 +86,11 @@ public class DubboImpl {
      * @return Map<String, String>
      * @since 1.2.0
      */
-    public static Map<String, String> getAttachments(Object invocation) {
+    public static Map<String, Object> getAttachments(Object invocation) {
         try {
             Class<?> invocationClass = invocation.getClass();
             Method methodOfGetAttachments = invocationClass.getMethod("getAttachments");
-            return (Map<String, String>) methodOfGetAttachments.invoke(invocation);
+            return (Map<String, Object>) methodOfGetAttachments.invoke(invocation);
         } catch (Exception e) {
             return null;
         }

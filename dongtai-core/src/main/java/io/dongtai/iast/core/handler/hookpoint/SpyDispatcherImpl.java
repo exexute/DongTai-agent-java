@@ -10,6 +10,8 @@ import io.dongtai.iast.core.handler.hookpoint.controller.impl.SinkImpl;
 import io.dongtai.iast.core.handler.hookpoint.controller.impl.SourceImpl;
 import io.dongtai.iast.core.handler.hookpoint.graphy.GraphBuilder;
 import io.dongtai.iast.core.handler.hookpoint.models.MethodEvent;
+import io.dongtai.iast.core.handler.trace.TraceContext;
+import io.dongtai.iast.core.handler.trace.Tracer;
 import io.dongtai.iast.core.service.ErrorLogReport;
 
 import java.lang.dongtai.SpyDispatcher;
@@ -45,17 +47,18 @@ public class SpyDispatcherImpl implements SpyDispatcher {
     @Override
     public void leaveHttp(Object request, Object response) {
         try {
-            if (EngineManager.isLingzhiRunning()) {
-                EngineManager.turnOffLingzhi();
+            TraceContext context = Tracer.getContext();
+            if (context.supportCollect()) {
+                context.stopCollect();
 
                 EngineManager.SCOPE_TRACKER.leaveHttp();
-                if (EngineManager.SCOPE_TRACKER.isExitedHttp() && EngineManager.isEnterHttp()) {
+                if (Tracer.getContext().isInEntry() && EngineManager.SCOPE_TRACKER.isExitedHttp()) {
                     EngineManager.maintainRequestCount();
                     GraphBuilder.buildAndReport(request, response);
                     EngineManager.cleanThreadState();
                 }
 
-                EngineManager.turnOnLingzhi();
+                context.restartCollect();
             }
 
         } catch (Exception e) {
@@ -129,21 +132,22 @@ public class SpyDispatcherImpl implements SpyDispatcher {
     @Override
     public void leaveDubbo() {
         try {
-            if (EngineManager.isLingzhiRunning()) {
-                EngineManager.turnOffLingzhi();
+            TraceContext context = Tracer.getContext();
+            if (context.supportCollect()) {
+                context.stopCollect();
 
-                EngineManager.leaveDubbo();
-                if (EngineManager.isExitedDubbo() && !EngineManager.isEnterHttp()) {
+                context.getTrackerHelper().leaveDubbo();
+                if (context.getTrackerHelper().isExitedDubbo() && !context.isInEntry()) {
                     EngineManager.maintainRequestCount();
                     GraphBuilder.buildAndReport(null, null);
                     EngineManager.cleanThreadState();
                 }
 
-                EngineManager.turnOnLingzhi();
+                context.restartCollect();
             }
         } catch (Exception e) {
             ErrorLogReport.sendErrorLog(e);
-            EngineManager.cleanThreadState();
+            Tracer.end();
         }
     }
 
@@ -156,7 +160,8 @@ public class SpyDispatcherImpl implements SpyDispatcher {
     @Override
     public boolean isFirstLevelDubbo() {
         try {
-            return EngineManager.isEngineRunning() && EngineManager.isFirstLevelDubbo();
+            TraceContext context = Tracer.getContext();
+            return EngineManager.isEngineRunning() && context.getTrackerHelper().isFirstLevelDubbo();
         } catch (Exception e) {
             ErrorLogReport.sendErrorLog(e);
         }
@@ -171,7 +176,8 @@ public class SpyDispatcherImpl implements SpyDispatcher {
     @Override
     public void enterSource() {
         try {
-            if (EngineManager.isLingzhiRunning()) {
+            TraceContext context = Tracer.getContext();
+            if (context.supportCollect()) {
                 EngineManager.SCOPE_TRACKER.enterSource();
             }
         } catch (Exception e) {
@@ -187,7 +193,7 @@ public class SpyDispatcherImpl implements SpyDispatcher {
     @Override
     public void leaveSource() {
         try {
-            if (EngineManager.isLingzhiRunning()) {
+            if (Tracer.getContext().supportCollect()) {
                 EngineManager.SCOPE_TRACKER.leaveSource();
             }
         } catch (Exception e) {
@@ -204,7 +210,7 @@ public class SpyDispatcherImpl implements SpyDispatcher {
     @Override
     public boolean isFirstLevelSource() {
         try {
-            return EngineManager.isLingzhiRunning() && EngineManager.isEngineRunning() && EngineManager.SCOPE_TRACKER
+            return EngineManager.isEngineRunning() && Tracer.getContext().supportCollect() && EngineManager.SCOPE_TRACKER
                     .isFirstLevelSource();
         } catch (Exception e) {
             return false;
@@ -219,7 +225,7 @@ public class SpyDispatcherImpl implements SpyDispatcher {
     @Override
     public void enterPropagator() {
         try {
-            if (EngineManager.isLingzhiRunning()) {
+            if (Tracer.getContext().supportCollect()) {
                 EngineManager.SCOPE_TRACKER.enterPropagation();
             }
         } catch (Exception e) {
@@ -235,7 +241,7 @@ public class SpyDispatcherImpl implements SpyDispatcher {
     @Override
     public void leavePropagator() {
         try {
-            if (EngineManager.isLingzhiRunning()) {
+            if (Tracer.getContext().supportCollect()) {
                 EngineManager.SCOPE_TRACKER.leavePropagation();
             }
         } catch (Exception e) {
@@ -252,7 +258,7 @@ public class SpyDispatcherImpl implements SpyDispatcher {
     @Override
     public boolean isFirstLevelPropagator() {
         try {
-            return EngineManager.isLingzhiRunning() && EngineManager.isEngineRunning() && EngineManager.SCOPE_TRACKER.isFirstLevelPropagator();
+            return Tracer.getContext().supportCollect() && EngineManager.isEngineRunning() && EngineManager.SCOPE_TRACKER.isFirstLevelPropagator();
         } catch (Exception e) {
             return false;
         }
@@ -266,7 +272,7 @@ public class SpyDispatcherImpl implements SpyDispatcher {
     @Override
     public void enterSink() {
         try {
-            if (EngineManager.isLingzhiRunning()) {
+            if (Tracer.getContext().supportCollect()) {
                 EngineManager.SCOPE_TRACKER.enterSink();
             }
         } catch (Exception e) {
@@ -282,7 +288,7 @@ public class SpyDispatcherImpl implements SpyDispatcher {
     @Override
     public void leaveSink() {
         try {
-            if (EngineManager.isLingzhiRunning()) {
+            if (Tracer.getContext().supportCollect()) {
                 EngineManager.SCOPE_TRACKER.leaveSink();
             }
         } catch (Exception e) {
@@ -299,7 +305,8 @@ public class SpyDispatcherImpl implements SpyDispatcher {
     @Override
     public boolean isFirstLevelSink() {
         try {
-            return EngineManager.isLingzhiRunning() && EngineManager.isEngineRunning() && EngineManager.isTopLevelSink();
+            TraceContext context = Tracer.getContext();
+            return EngineManager.isEngineRunning() && context.supportCollect() && context.getTrackerHelper().isFirstLevelSink();
         } catch (Exception e) {
             return false;
         }
@@ -325,13 +332,14 @@ public class SpyDispatcherImpl implements SpyDispatcher {
     public boolean collectMethodPool(Object instance, Object[] argumentArray, Object retValue, String framework,
                                      String className, String matchClassName, String methodName, String methodSign, boolean isStatic,
                                      int hookType) {
-        if (!EngineManager.isLingzhiRunning() && (HookType.HTTP.equals(hookType) || HookType.DUBBO.equals(hookType))) {
-            EngineManager.turnOnLingzhi();
-        }
+        TraceContext context = Tracer.getContext();
+        boolean supportCollect = context.supportCollect();
 
-        if (EngineManager.isLingzhiRunning()) {
+        if (supportCollect || (HookType.HTTP.equals(hookType) || HookType.DUBBO.equals(hookType))) {
             try {
-                EngineManager.turnOffLingzhi();
+                if (supportCollect) {
+                    context.stopCollect();
+                }
 
                 if (HookType.SPRINGAPPLICATION.equals(hookType)) {
                     if (!SpringApplicationImpl.isFinished()) {
@@ -340,7 +348,7 @@ public class SpyDispatcherImpl implements SpyDispatcher {
                         SpringApplicationImpl.getWebApplicationContext(event);
                     }
                 } else {
-                    boolean isEnterEntryPoint = EngineManager.isEnterHttp() || EngineManager.isFirstLevelDubbo();
+                    boolean isEnterEntryPoint = context.isInEntry() || context.getTrackerHelper().isFirstLevelDubbo();
                     boolean isEntryPointMethod = HookType.HTTP.equals(hookType) || HookType.DUBBO.equals(hookType);
                     if (isEnterEntryPoint || isEntryPointMethod) {
                         MethodEvent event = new MethodEvent(0, -1, className, matchClassName, methodName,
@@ -349,11 +357,11 @@ public class SpyDispatcherImpl implements SpyDispatcher {
                             HttpImpl.solveHttp(event);
                         } else if (HookType.DUBBO.equals(hookType)) {
                             DubboImpl.solveDubbo(event, INVOKE_ID_SEQUENCER);
-                        } else if (HookType.PROPAGATOR.equals(hookType) && !EngineManager.TAINT_POOL.get().isEmpty()) {
+                        } else if (HookType.PROPAGATOR.equals(hookType) && !context.getMethodTaintPool().isEmpty()) {
                             PropagatorImpl.solvePropagator(event, INVOKE_ID_SEQUENCER);
                         } else if (HookType.SOURCE.equals(hookType)) {
                             SourceImpl.solveSource(event, INVOKE_ID_SEQUENCER);
-                        } else if (HookType.SINK.equals(hookType) && !EngineManager.TAINT_POOL.get().isEmpty()) {
+                        } else if (HookType.SINK.equals(hookType) && !context.getMethodTaintPool().isEmpty()) {
                             SinkImpl.solveSink(event);
                         }
                     }
@@ -361,7 +369,9 @@ public class SpyDispatcherImpl implements SpyDispatcher {
             } catch (Exception e) {
                 ErrorLogReport.sendErrorLog(e);
             } finally {
-                EngineManager.turnOnLingzhi();
+                if (supportCollect) {
+                    context.restartCollect();
+                }
             }
         }
         return false;

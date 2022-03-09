@@ -10,6 +10,7 @@ import io.dongtai.iast.core.handler.hookpoint.vulscan.normal.CookieFlagsMissingV
 import io.dongtai.iast.core.handler.hookpoint.vulscan.normal.CryptoBacCiphersVulScan;
 import io.dongtai.iast.core.handler.hookpoint.vulscan.normal.CryptoBadMacVulScan;
 import io.dongtai.iast.core.handler.hookpoint.vulscan.normal.CryptoWeakRandomnessVulScan;
+import io.dongtai.iast.core.handler.trace.Tracer;
 import io.dongtai.iast.core.utils.Asserts;
 
 /**
@@ -38,7 +39,7 @@ public class SinkImpl {
             new CryptoBacCiphersVulScan().scan(sink, event);
         } else if (VulnType.COOKIE_FLAGS_MISSING.equals(sinkType)) {
             new CookieFlagsMissingVulScan().scan(sink, event);
-        } else if (EngineManager.TAINT_POOL.isNotEmpty()) {
+        } else if (!Tracer.getContext().getMethodTaintPool().isEmpty()) {
             new DynamicPropagatorScanner().scan(sink, event);
         }
     }

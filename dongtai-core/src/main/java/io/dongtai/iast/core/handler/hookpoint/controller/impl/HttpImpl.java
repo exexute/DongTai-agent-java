@@ -3,6 +3,7 @@ package io.dongtai.iast.core.handler.hookpoint.controller.impl;
 import io.dongtai.iast.core.EngineManager;
 import io.dongtai.iast.core.handler.hookpoint.IastClassLoader;
 import io.dongtai.iast.core.handler.hookpoint.models.MethodEvent;
+import io.dongtai.iast.core.handler.trace.Tracer;
 import io.dongtai.iast.core.service.ErrorLogReport;
 import io.dongtai.iast.core.utils.HttpClientUtils;
 import io.dongtai.iast.core.utils.matcher.ConfigMatcher;
@@ -168,16 +169,18 @@ public class HttpImpl {
         }
 
         Map<String, Object> requestMeta = getRequestMeta(event.argumentArray[0]);
-        // todo Consider increasing the capture of html request responses
-        if (ConfigMatcher.getInstance().disableExtension((String) requestMeta.get("requestURI"))) {
-            return;
-        }
-        if (ConfigMatcher.getInstance().getBlackUrl(requestMeta)) {
-            return;
-        }
-
-        // todo: add custom header escape
-        EngineManager.enterHttpEntry(requestMeta);
+//        // todo Consider increasing the capture of html request responses
+//        if (ConfigMatcher.getInstance().disableExtension((String) requestMeta.get("requestURI"))) {
+//            return;
+//        }
+//        if (ConfigMatcher.getInstance().getBlackUrl(requestMeta)) {
+//            return;
+//        }
+//
+//        // todo: add custom header escape
+//        EngineManager.enterHttpEntry(requestMeta);
+        // fixme: replace with
+        Tracer.start(requestMeta);
 
         if (DongTaiLog.isDebugEnabled()) {
             DongTaiLog.debug("HTTP Request:{} {} from: {}", requestMeta.get("method"), requestMeta.get("requestURI"),

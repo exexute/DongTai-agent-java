@@ -1,6 +1,8 @@
 package io.dongtai.iast.core.utils;
 
 import io.dongtai.iast.core.EngineManager;
+import io.dongtai.iast.core.handler.trace.TraceContext;
+import io.dongtai.iast.core.handler.trace.Tracer;
 import io.dongtai.iast.core.utils.PropertyUtils;
 import io.dongtai.iast.core.handler.hookpoint.models.MethodEvent;
 
@@ -20,7 +22,7 @@ public class TaintPoolUtils {
         if (obj == null) {
             return false;
         }
-
+        TraceContext context = Tracer.getContext();
         boolean isContains;
         boolean isString = obj instanceof String;
         // 检查对象是否存在
@@ -31,7 +33,7 @@ public class TaintPoolUtils {
                 for (String stringItem : stringArray) {
                     isContains = contains(stringItem, true, event);
                     if (isContains) {
-                        EngineManager.TAINT_POOL.addToPool(obj);
+                        context.getMethodTaintPool().add(obj);
                         event.addSourceHash(obj.hashCode());
                         break;
                     }
@@ -58,12 +60,13 @@ public class TaintPoolUtils {
      * @return
      */
     private static boolean contains(Object obj, boolean isString, MethodEvent event) {
-        Set<Object> taints = EngineManager.TAINT_POOL.get();
+        TraceContext context = Tracer.getContext();
+        Set<Object> taints = context.getMethodTaintPool();
         int hashcode = 0;
         // 检查是否
 
         if (isString && PropertyUtils.getInstance().isNormalMode()) {
-            // todo: 假设，字符串可以命中 TAINT_HASH_CODES 的前提，是已经命中 TAINT_POOL，则可以通过 TAINT_POOL 判断，减少后续的判断次数
+            // todo: 假设，字符串可以命中 @TraceContext.methodTaintPool 的前提，是已经命中 @TraceContext.methodTaintPool，则可以通过 @TraceContext.methodTaintPool 判断，减少后续的判断次数
             if (!taints.contains(obj)) {
                 return false;
             }
@@ -74,9 +77,7 @@ public class TaintPoolUtils {
                 try {
                     Object value = iterator.next();
                     if (obj.equals(value)) {
-                        // 检查当前污点的hashcode是否在hashcode池中，如果在，则标记传播
-                        // fixme: 字符串匹配次数太多导致
-                        if (EngineManager.TAINT_HASH_CODES.get().contains(hashcode)) {
+                        if (context.getMethodTaintPool().contains(hashcode)) {
                             event.addSourceHash(hashcode);
                             return true;
                         }

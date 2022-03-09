@@ -8,6 +8,7 @@ import io.dongtai.iast.core.bytecode.enhance.plugin.PluginRegister;
 import io.dongtai.iast.core.bytecode.sca.ScaScanner;
 import io.dongtai.iast.core.handler.hookpoint.SpyDispatcherImpl;
 import io.dongtai.iast.core.handler.hookpoint.models.IastHookRuleModel;
+import io.dongtai.iast.core.handler.trace.Tracer;
 import io.dongtai.iast.core.service.ErrorLogReport;
 import io.dongtai.iast.core.utils.AsmUtils;
 import io.dongtai.iast.core.utils.PropertyUtils;
@@ -123,9 +124,9 @@ public class IastClassFileTransformer implements ClassFileTransformer {
             return null;
         }
         matchClock.resume();
-        boolean isRunning = EngineManager.isLingzhiRunning();
+        boolean isRunning = Tracer.getContext().supportCollect();
         if (isRunning) {
-            EngineManager.turnOffLingzhi();
+            Tracer.getContext().stopCollect();
         }
 
         try {
@@ -173,7 +174,7 @@ public class IastClassFileTransformer implements ClassFileTransformer {
         } catch (Throwable ignore) {
         } finally {
             if (isRunning) {
-                EngineManager.turnOnLingzhi();
+                Tracer.getContext().restartCollect();
             }
             matchClock.suspend();
         }

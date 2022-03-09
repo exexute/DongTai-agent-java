@@ -1,25 +1,52 @@
-package io.dongtai.iast.core.utils.threadlocal;
+package io.dongtai.iast.core.handler.trace;
 
 import io.dongtai.iast.core.EngineManager;
-import io.dongtai.iast.core.handler.trace.Tracer;
-import io.dongtai.iast.core.utils.PropertyUtils;
+import io.dongtai.iast.core.handler.hookpoint.controller.TrackerHelper;
 import io.dongtai.iast.core.handler.hookpoint.models.MethodEvent;
 import io.dongtai.log.DongTaiLog;
+import lombok.Getter;
+import lombok.Setter;
 
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * @author dongzhiyong@huoxian.cn
- */
-public class IastTaintPool extends ThreadLocal<HashSet<Object>> {
+public class TraceContext {
+    @Getter
+    @Setter
+    Integer entryState;
+    @Getter
+    @Setter
+    Boolean collectState;
+    @Getter
+    @Setter
+    Map<String, Object> requestMeta;
+    @Getter
+    @Setter
+    Map<Integer, MethodEvent> traceMethodMap;
+    @Getter
+    @Setter
+    Set<Object> methodTaintPool;
+    @Getter
+    @Setter
+    Set<Integer> methodTaintSignature;
+    @Getter
+    @Setter
+    TrackerHelper trackerHelper;
 
-    private static final PropertyUtils PROPERTIES = PropertyUtils.getInstance();
+    public boolean supportCollect() {
+        return collectState;
+    }
 
-    @Override
-    protected HashSet<Object> initialValue() {
-        return null;
+    public void stopCollect() {
+        collectState = false;
+    }
+
+    public void restartCollect() {
+        collectState = true;
+    }
+
+    public boolean isInEntry() {
+        return entryState == 1;
     }
 
     /**
@@ -35,25 +62,18 @@ public class IastTaintPool extends ThreadLocal<HashSet<Object>> {
         try {
             int subHashCode = 0;
             if (obj instanceof String[]) {
-                this.get().add(obj);
+                methodTaintPool.add(obj);
                 event.addTargetHash(obj.hashCode());
 
                 String[] tempObjs = (String[]) obj;
-                if (PROPERTIES.isNormalMode()) {
-                    for (String tempObj : tempObjs) {
-                        this.get().add(tempObj);
-                        subHashCode = System.identityHashCode(tempObj);
-                        Tracer.getContext().getMethodTaintPool().add(subHashCode);
-                        event.addTargetHash(subHashCode);
-                    }
-                } else {
-                    for (String tempObj : tempObjs) {
-                        this.get().add(tempObj);
-                        event.addTargetHash(tempObj.hashCode());
-                    }
+                for (String tempObj : tempObjs) {
+                    methodTaintPool.add(tempObj);
+                    subHashCode = System.identityHashCode(tempObj);
+                    methodTaintSignature.add(subHashCode);
+                    event.addTargetHash(subHashCode);
                 }
             } else if (obj instanceof Map) {
-                this.get().add(obj);
+                methodTaintPool.add(obj);
                 event.addTargetHash(obj.hashCode());
                 if (isSource) {
                     Map<String, String[]> tempMap = (Map<String, String[]>) obj;
@@ -75,9 +95,10 @@ public class IastTaintPool extends ThreadLocal<HashSet<Object>> {
                     }
                 }
             } else {
-                this.get().add(obj);
-                if (obj instanceof String && PROPERTIES.isNormalMode()) {
-                    Tracer.getContext().getMethodTaintPool().add(System.identityHashCode(obj));
+                methodTaintPool.add(obj);
+                if (obj instanceof String) {
+                    subHashCode = System.identityHashCode(obj);
+                    methodTaintSignature.add(subHashCode);
                 } else {
                     subHashCode = obj.hashCode();
                 }
@@ -87,17 +108,5 @@ public class IastTaintPool extends ThreadLocal<HashSet<Object>> {
         } catch (Exception e) {
             DongTaiLog.error("add taint failure, obj is {}, obj class is {}, obj componentType is {}", obj, obj.getClass(), obj.getClass().getComponentType().getName());
         }
-    }
-
-    public void addToPool(Object obj) {
-        this.get().add(obj);
-    }
-
-    public boolean isEmpty() {
-        return this.get().isEmpty();
-    }
-
-    public boolean isNotEmpty() {
-        return !this.get().isEmpty();
     }
 }
