@@ -1,9 +1,9 @@
 package io.dongtai.iast.core.bytecode.enhance.plugin.core.adapter;
 
-import io.dongtai.iast.core.utils.PropertyUtils;
 import io.dongtai.iast.core.bytecode.enhance.IastContext;
 import io.dongtai.iast.core.bytecode.enhance.plugin.AbstractAdviceAdapter;
 import io.dongtai.iast.core.handler.hookpoint.controller.HookType;
+import io.dongtai.iast.core.utils.PropertyUtils;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 

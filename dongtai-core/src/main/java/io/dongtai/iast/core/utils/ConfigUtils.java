@@ -1,15 +1,14 @@
 package io.dongtai.iast.core.utils;
 
 import io.dongtai.iast.core.service.ErrorLogReport;
+import io.dongtai.log.DongTaiLog;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.LineIterator;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.LineIterator;
-import io.dongtai.log.DongTaiLog;
 
 /**
  * @author dongzhiyong@huoxian.cn

@@ -3,14 +3,10 @@ package io.dongtai.iast.core;
 import io.dongtai.iast.core.handler.context.ContextManager;
 import io.dongtai.iast.core.handler.hookpoint.IastServer;
 import io.dongtai.iast.core.handler.trace.Tracer;
-import io.dongtai.iast.core.utils.threadlocal.IastScopeTracker;
-import io.dongtai.iast.core.utils.threadlocal.IastServerPort;
-import io.dongtai.iast.core.utils.threadlocal.IastTaintPool;
 import io.dongtai.iast.core.service.ServiceFactory;
 import io.dongtai.iast.core.utils.PropertyUtils;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 
 /**
@@ -25,8 +21,6 @@ public class EngineManager {
     private final boolean supportLazyHook;
     private final boolean saveBytecode;
 
-    public static final IastScopeTracker SCOPE_TRACKER = new IastScopeTracker();
-    private static final IastServerPort LOGIN_LOGIC_WEIGHT = new IastServerPort();
     /**
      * 标记是否位于 IAST 的代码中，如果该值为 true 表示 iast 在运行中；如果 该值为 false 表示当前位置在iast的代码中，所有iast逻辑都bypass，直接退出
      */
@@ -52,14 +46,6 @@ public class EngineManager {
         this.saveBytecode = cfg.isEnableDumpClass();
         this.agentId = agentId;
 
-    }
-
-    /**
-     * 清除当前线程的状态，避免线程重用导致的ThreadLocal产生内存泄漏的问题
-     */
-    public static void cleanThreadState() {
-        EngineManager.LOGIN_LOGIC_WEIGHT.remove();
-        EngineManager.SCOPE_TRACKER.remove();
     }
 
     public static void maintainRequestCount() {
@@ -171,7 +157,7 @@ public class EngineManager {
             requestMeta.put("contextPath", "");
             requestMeta.put("replay-request", false);
 
-            Tracer.start(requestMeta);
+            Tracer.startHook(requestMeta);
         }
     }
 

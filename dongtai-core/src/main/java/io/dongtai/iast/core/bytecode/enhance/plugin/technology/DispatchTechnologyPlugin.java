@@ -3,9 +3,9 @@ package io.dongtai.iast.core.bytecode.enhance.plugin.technology;
 import io.dongtai.iast.core.bytecode.enhance.IastContext;
 import io.dongtai.iast.core.bytecode.enhance.plugin.AbstractClassVisitor;
 import io.dongtai.iast.core.bytecode.enhance.plugin.DispatchPlugin;
+import io.dongtai.log.DongTaiLog;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
-import io.dongtai.log.DongTaiLog;
 
 import java.util.HashMap;
 import java.util.Map;

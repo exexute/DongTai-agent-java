@@ -1,6 +1,5 @@
 package io.dongtai.iast.core.handler.hookpoint.controller.impl;
 
-import io.dongtai.iast.core.EngineManager;
 import io.dongtai.iast.core.handler.hookpoint.models.MethodEvent;
 import io.dongtai.iast.core.handler.trace.Tracer;
 import io.dongtai.iast.core.utils.StackUtils;

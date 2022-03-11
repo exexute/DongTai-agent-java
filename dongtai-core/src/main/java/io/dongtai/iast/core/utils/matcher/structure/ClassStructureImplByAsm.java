@@ -8,10 +8,10 @@ import io.dongtai.iast.core.utils.LazyGet;
 import io.dongtai.iast.core.utils.SandboxStringUtils;
 import io.dongtai.iast.core.utils.collection.Pair;
 import io.dongtai.iast.core.utils.matcher.structure.PrimitiveClassStructure.Primitive;
+import io.dongtai.log.DongTaiLog;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.objectweb.asm.*;
-import io.dongtai.log.DongTaiLog;
 
 import java.io.IOException;
 import java.io.InputStream;

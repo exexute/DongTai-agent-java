@@ -4,11 +4,12 @@ import io.dongtai.iast.core.bytecode.enhance.IastContext;
 import io.dongtai.iast.core.bytecode.enhance.asm.AsmMethods;
 import io.dongtai.iast.core.bytecode.enhance.asm.AsmTypes;
 import io.dongtai.iast.core.utils.AsmUtils;
-import java.lang.reflect.Modifier;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.AdviceAdapter;
+
+import java.lang.reflect.Modifier;
 
 /**
  * @author dongzhiyong@huoxian.cn

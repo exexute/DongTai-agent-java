@@ -1,12 +1,11 @@
 package io.dongtai.iast.core.init.impl;
 
-import io.dongtai.iast.core.utils.PropertyUtils;
-import io.dongtai.iast.core.init.IEngine;
 import io.dongtai.iast.core.handler.hookpoint.models.IastHookRuleModel;
+import io.dongtai.iast.core.init.IEngine;
+import io.dongtai.iast.core.utils.PropertyUtils;
+import io.dongtai.log.DongTaiLog;
 
 import java.lang.instrument.Instrumentation;
-
-import io.dongtai.log.DongTaiLog;
 
 /**
  * @author dongzhiyong@huoxian.cn

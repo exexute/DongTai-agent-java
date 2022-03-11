@@ -1,7 +1,7 @@
 package com.secnium.iast.core.engines;
 
-import io.dongtai.iast.core.utils.PropertyUtils;
 import io.dongtai.iast.core.init.impl.ConfigEngine;
+import io.dongtai.iast.core.utils.PropertyUtils;
 import org.junit.Test;
 
 public class ConfigEngineTest {

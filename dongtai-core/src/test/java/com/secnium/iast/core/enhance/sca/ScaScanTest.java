@@ -1,10 +1,10 @@
 package com.secnium.iast.core.enhance.sca;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-
 import io.dongtai.iast.core.bytecode.sca.ScaScanner;
 import org.junit.Test;
+
+import java.net.MalformedURLException;
+import java.net.URL;
 
 public class ScaScanTest {
 

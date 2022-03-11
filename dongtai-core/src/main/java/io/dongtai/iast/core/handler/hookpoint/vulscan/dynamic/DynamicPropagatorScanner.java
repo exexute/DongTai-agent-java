@@ -1,6 +1,5 @@
 package io.dongtai.iast.core.handler.hookpoint.vulscan.dynamic;
 
-import io.dongtai.iast.core.EngineManager;
 import io.dongtai.iast.core.handler.context.ContextManager;
 import io.dongtai.iast.core.handler.hookpoint.SpyDispatcherImpl;
 import io.dongtai.iast.core.handler.hookpoint.models.IastSinkModel;

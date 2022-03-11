@@ -3,11 +3,10 @@ package io.dongtai.iast.core.service;
 import io.dongtai.iast.core.EngineManager;
 import io.dongtai.iast.core.handler.hookpoint.vulscan.ReportConstant;
 import io.dongtai.iast.core.utils.Constants;
+import org.json.JSONObject;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-
-import org.json.JSONObject;
 
 /**
  * 生成并生成错误日志报告

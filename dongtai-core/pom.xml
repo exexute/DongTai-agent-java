@@ -94,9 +94,13 @@
                                     <pattern>javax.xml.stream</pattern>
                                     <shadedPattern>${shade-prefix}.javax.xml.stream</shadedPattern>
                                 </relocation>
-                                <relocation>com.sun.jna
+                                <relocation>
                                     <pattern>com.sun.jna</pattern>
                                     <shadedPattern>${shade-prefix}.com.sun.jna</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.alibaba.</pattern>
+                                    <shadedPattern>${shade-prefix}.com.alibaba.</shadedPattern>
                                 </relocation>
                             </relocations>
                         </configuration>

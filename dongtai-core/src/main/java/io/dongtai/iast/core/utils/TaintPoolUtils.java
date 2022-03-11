@@ -1,10 +1,8 @@
 package io.dongtai.iast.core.utils;
 
-import io.dongtai.iast.core.EngineManager;
+import io.dongtai.iast.core.handler.hookpoint.models.MethodEvent;
 import io.dongtai.iast.core.handler.trace.TraceContext;
 import io.dongtai.iast.core.handler.trace.Tracer;
-import io.dongtai.iast.core.utils.PropertyUtils;
-import io.dongtai.iast.core.handler.hookpoint.models.MethodEvent;
 
 import java.util.Iterator;
 import java.util.Set;
@@ -63,9 +61,8 @@ public class TaintPoolUtils {
         TraceContext context = Tracer.getContext();
         Set<Object> taints = context.getMethodTaintPool();
         int hashcode = 0;
-        // 检查是否
 
-        if (isString && PropertyUtils.getInstance().isNormalMode()) {
+        if (isString) {
             // todo: 假设，字符串可以命中 @TraceContext.methodTaintPool 的前提，是已经命中 @TraceContext.methodTaintPool，则可以通过 @TraceContext.methodTaintPool 判断，减少后续的判断次数
             if (!taints.contains(obj)) {
                 return false;
@@ -77,7 +74,7 @@ public class TaintPoolUtils {
                 try {
                     Object value = iterator.next();
                     if (obj.equals(value)) {
-                        if (context.getMethodTaintPool().contains(hashcode)) {
+                        if (context.getMethodTaintSignature().contains(hashcode)) {
                             event.addSourceHash(hashcode);
                             return true;
                         }

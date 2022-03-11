@@ -1,8 +1,9 @@
 package io.dongtai.iast.core.bytecode.enhance.asm;
 
+import org.objectweb.asm.commons.Method;
+
 import java.lang.dongtai.SpyDispatcher;
 import java.lang.dongtai.SpyDispatcherHandler;
-import org.objectweb.asm.commons.Method;
 
 /**
  * 常用的ASM method 集合 省得我到处声明

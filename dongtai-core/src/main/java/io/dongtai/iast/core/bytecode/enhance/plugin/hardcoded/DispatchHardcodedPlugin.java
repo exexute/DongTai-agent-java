@@ -9,13 +9,12 @@ import io.dongtai.iast.core.service.ThreadPools;
 import io.dongtai.iast.core.utils.Constants;
 import io.dongtai.iast.core.utils.base64.Base64Encoder;
 import io.dongtai.iast.core.utils.commonUtils;
-
-import java.lang.reflect.Modifier;
-import java.util.regex.Pattern;
-
 import org.json.JSONObject;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
+
+import java.lang.reflect.Modifier;
+import java.util.regex.Pattern;
 
 /**
  * 检测字节码中使用硬编码的转换类

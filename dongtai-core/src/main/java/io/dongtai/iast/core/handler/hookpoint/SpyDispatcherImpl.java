@@ -3,11 +3,7 @@ package io.dongtai.iast.core.handler.hookpoint;
 import io.dongtai.iast.core.EngineManager;
 import io.dongtai.iast.core.bytecode.enhance.plugin.spring.SpringApplicationImpl;
 import io.dongtai.iast.core.handler.hookpoint.controller.HookType;
-import io.dongtai.iast.core.handler.hookpoint.controller.impl.DubboImpl;
-import io.dongtai.iast.core.handler.hookpoint.controller.impl.HttpImpl;
-import io.dongtai.iast.core.handler.hookpoint.controller.impl.PropagatorImpl;
-import io.dongtai.iast.core.handler.hookpoint.controller.impl.SinkImpl;
-import io.dongtai.iast.core.handler.hookpoint.controller.impl.SourceImpl;
+import io.dongtai.iast.core.handler.hookpoint.controller.impl.*;
 import io.dongtai.iast.core.handler.hookpoint.graphy.GraphBuilder;
 import io.dongtai.iast.core.handler.hookpoint.models.MethodEvent;
 import io.dongtai.iast.core.handler.trace.TraceContext;
@@ -32,7 +28,7 @@ public class SpyDispatcherImpl implements SpyDispatcher {
     @Override
     public void enterHttp() {
         try {
-            EngineManager.SCOPE_TRACKER.enterHttp();
+            Tracer.getContext().getTrackerHelper().enterHttp();
         } catch (Exception e) {
             ErrorLogReport.sendErrorLog(e);
         }
@@ -51,19 +47,18 @@ public class SpyDispatcherImpl implements SpyDispatcher {
             if (context.supportCollect()) {
                 context.stopCollect();
 
-                EngineManager.SCOPE_TRACKER.leaveHttp();
-                if (Tracer.getContext().isInEntry() && EngineManager.SCOPE_TRACKER.isExitedHttp()) {
+                context.getTrackerHelper().leaveHttp();
+                if (context.isInEntry() && context.getTrackerHelper().isExitedHttp()) {
                     EngineManager.maintainRequestCount();
                     GraphBuilder.buildAndReport(request, response);
-                    EngineManager.cleanThreadState();
+                    Tracer.end();
+                } else {
+                    context.restartCollect();
                 }
-
-                context.restartCollect();
             }
-
         } catch (Exception e) {
             ErrorLogReport.sendErrorLog(e);
-            EngineManager.cleanThreadState();
+            Tracer.end();
         }
     }
 
@@ -76,8 +71,7 @@ public class SpyDispatcherImpl implements SpyDispatcher {
     @Override
     public boolean isFirstLevelHttp() {
         try {
-            return EngineManager.isEngineRunning() && EngineManager.SCOPE_TRACKER
-                    .isFirstLevelHttp();
+            return EngineManager.isEngineRunning() && Tracer.getContext().getTrackerHelper().isFirstLevelHttp();
         } catch (Exception e) {
             ErrorLogReport.sendErrorLog(e);
         }
@@ -118,7 +112,7 @@ public class SpyDispatcherImpl implements SpyDispatcher {
     @Override
     public void enterDubbo() {
         try {
-            EngineManager.SCOPE_TRACKER.enterDubbo();
+            Tracer.getContext().getTrackerHelper().enterDubbo();
         } catch (Exception e) {
             ErrorLogReport.sendErrorLog(e);
         }
@@ -140,7 +134,7 @@ public class SpyDispatcherImpl implements SpyDispatcher {
                 if (context.getTrackerHelper().isExitedDubbo() && !context.isInEntry()) {
                     EngineManager.maintainRequestCount();
                     GraphBuilder.buildAndReport(null, null);
-                    EngineManager.cleanThreadState();
+                    Tracer.end();
                 }
 
                 context.restartCollect();
@@ -176,10 +170,7 @@ public class SpyDispatcherImpl implements SpyDispatcher {
     @Override
     public void enterSource() {
         try {
-            TraceContext context = Tracer.getContext();
-            if (context.supportCollect()) {
-                EngineManager.SCOPE_TRACKER.enterSource();
-            }
+            Tracer.getContext().getTrackerHelper().enterSource();
         } catch (Exception e) {
             ErrorLogReport.sendErrorLog(e);
         }
@@ -193,9 +184,7 @@ public class SpyDispatcherImpl implements SpyDispatcher {
     @Override
     public void leaveSource() {
         try {
-            if (Tracer.getContext().supportCollect()) {
-                EngineManager.SCOPE_TRACKER.leaveSource();
-            }
+            Tracer.getContext().getTrackerHelper().leaveSource();
         } catch (Exception e) {
             ErrorLogReport.sendErrorLog(e);
         }
@@ -210,8 +199,8 @@ public class SpyDispatcherImpl implements SpyDispatcher {
     @Override
     public boolean isFirstLevelSource() {
         try {
-            return EngineManager.isEngineRunning() && Tracer.getContext().supportCollect() && EngineManager.SCOPE_TRACKER
-                    .isFirstLevelSource();
+            TraceContext context = Tracer.getContext();
+            return EngineManager.isEngineRunning() && context.supportCollect() && context.getTrackerHelper().isFirstLevelSource();
         } catch (Exception e) {
             return false;
         }
@@ -225,9 +214,7 @@ public class SpyDispatcherImpl implements SpyDispatcher {
     @Override
     public void enterPropagator() {
         try {
-            if (Tracer.getContext().supportCollect()) {
-                EngineManager.SCOPE_TRACKER.enterPropagation();
-            }
+            Tracer.getContext().getTrackerHelper().enterPropagation();
         } catch (Exception e) {
             ErrorLogReport.sendErrorLog(e);
         }
@@ -241,9 +228,7 @@ public class SpyDispatcherImpl implements SpyDispatcher {
     @Override
     public void leavePropagator() {
         try {
-            if (Tracer.getContext().supportCollect()) {
-                EngineManager.SCOPE_TRACKER.leavePropagation();
-            }
+            Tracer.getContext().getTrackerHelper().leavePropagation();
         } catch (Exception e) {
             ErrorLogReport.sendErrorLog(e);
         }
@@ -258,7 +243,7 @@ public class SpyDispatcherImpl implements SpyDispatcher {
     @Override
     public boolean isFirstLevelPropagator() {
         try {
-            return Tracer.getContext().supportCollect() && EngineManager.isEngineRunning() && EngineManager.SCOPE_TRACKER.isFirstLevelPropagator();
+            return EngineManager.isEngineRunning() && Tracer.getContext().getTrackerHelper().isFirstLevelPropagator();
         } catch (Exception e) {
             return false;
         }
@@ -272,9 +257,7 @@ public class SpyDispatcherImpl implements SpyDispatcher {
     @Override
     public void enterSink() {
         try {
-            if (Tracer.getContext().supportCollect()) {
-                EngineManager.SCOPE_TRACKER.enterSink();
-            }
+            Tracer.getContext().getTrackerHelper().enterSink();
         } catch (Exception e) {
             ErrorLogReport.sendErrorLog(e);
         }
@@ -288,9 +271,7 @@ public class SpyDispatcherImpl implements SpyDispatcher {
     @Override
     public void leaveSink() {
         try {
-            if (Tracer.getContext().supportCollect()) {
-                EngineManager.SCOPE_TRACKER.leaveSink();
-            }
+            Tracer.getContext().getTrackerHelper().leaveSink();
         } catch (Exception e) {
             ErrorLogReport.sendErrorLog(e);
         }
@@ -305,8 +286,7 @@ public class SpyDispatcherImpl implements SpyDispatcher {
     @Override
     public boolean isFirstLevelSink() {
         try {
-            TraceContext context = Tracer.getContext();
-            return EngineManager.isEngineRunning() && context.supportCollect() && context.getTrackerHelper().isFirstLevelSink();
+            return EngineManager.isEngineRunning() && Tracer.getContext().getTrackerHelper().isFirstLevelSink();
         } catch (Exception e) {
             return false;
         }

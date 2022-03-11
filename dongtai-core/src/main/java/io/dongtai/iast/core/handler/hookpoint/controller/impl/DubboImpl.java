@@ -1,7 +1,6 @@
 package io.dongtai.iast.core.handler.hookpoint.controller.impl;
 
 
-import io.dongtai.iast.core.EngineManager;
 import io.dongtai.iast.core.handler.hookpoint.models.MethodEvent;
 import io.dongtai.iast.core.handler.trace.TraceContext;
 import io.dongtai.iast.core.handler.trace.Tracer;
@@ -30,7 +29,7 @@ public class DubboImpl {
             return;
         }
         attachments.put("dubboService", dubboService);
-        Tracer.start(attachments);
+        Tracer.startHook(attachments);
         TraceContext context = Tracer.getContext();
 
         if (context.isInEntry()) {

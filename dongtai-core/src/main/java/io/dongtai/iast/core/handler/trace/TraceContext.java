@@ -1,6 +1,5 @@
 package io.dongtai.iast.core.handler.trace;
 
-import io.dongtai.iast.core.EngineManager;
 import io.dongtai.iast.core.handler.hookpoint.controller.TrackerHelper;
 import io.dongtai.iast.core.handler.hookpoint.models.MethodEvent;
 import io.dongtai.log.DongTaiLog;
@@ -13,25 +12,25 @@ import java.util.Set;
 public class TraceContext {
     @Getter
     @Setter
-    Integer entryState;
+    Integer entryState = 0;
     @Getter
     @Setter
-    Boolean collectState;
+    Boolean collectState = false;
     @Getter
     @Setter
-    Map<String, Object> requestMeta;
+    Map<String, Object> requestMeta = null;
     @Getter
     @Setter
-    Map<Integer, MethodEvent> traceMethodMap;
+    Map<Integer, MethodEvent> traceMethodMap = null;
     @Getter
     @Setter
-    Set<Object> methodTaintPool;
+    Set<Object> methodTaintPool = null;
     @Getter
     @Setter
-    Set<Integer> methodTaintSignature;
+    Set<Integer> methodTaintSignature = null;
     @Getter
     @Setter
-    TrackerHelper trackerHelper;
+    TrackerHelper trackerHelper = new TrackerHelper();
 
     public boolean supportCollect() {
         return collectState;

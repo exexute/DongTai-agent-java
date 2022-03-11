@@ -1,6 +1,5 @@
 package io.dongtai.iast.core.handler.hookpoint.controller.impl;
 
-import io.dongtai.iast.core.EngineManager;
 import io.dongtai.iast.core.handler.hookpoint.models.IastHookRuleModel;
 import io.dongtai.iast.core.handler.hookpoint.models.IastSinkModel;
 import io.dongtai.iast.core.handler.hookpoint.models.MethodEvent;

@@ -1,24 +1,23 @@
 package io.dongtai.iast.core.handler.hookpoint.graphy;
 
 import io.dongtai.iast.core.EngineManager;
-import io.dongtai.iast.core.handler.trace.Tracer;
-import io.dongtai.iast.core.utils.PropertyUtils;
 import io.dongtai.iast.core.bytecode.enhance.IastClassDiagram;
 import io.dongtai.iast.core.handler.hookpoint.controller.impl.HttpImpl;
 import io.dongtai.iast.core.handler.hookpoint.models.MethodEvent;
 import io.dongtai.iast.core.handler.hookpoint.vulscan.ReportConstant;
 import io.dongtai.iast.core.handler.hookpoint.vulscan.normal.AbstractNormalVulScan;
+import io.dongtai.iast.core.handler.trace.Tracer;
 import io.dongtai.iast.core.service.ThreadPools;
 import io.dongtai.iast.core.utils.Constants;
+import io.dongtai.iast.core.utils.PropertyUtils;
 import io.dongtai.iast.core.utils.base64.Base64Encoder;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 /**
  * @author dongzhiyong@huoxian.cn

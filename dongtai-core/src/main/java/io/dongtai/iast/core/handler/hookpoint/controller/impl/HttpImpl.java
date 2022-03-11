@@ -1,12 +1,10 @@
 package io.dongtai.iast.core.handler.hookpoint.controller.impl;
 
-import io.dongtai.iast.core.EngineManager;
 import io.dongtai.iast.core.handler.hookpoint.IastClassLoader;
 import io.dongtai.iast.core.handler.hookpoint.models.MethodEvent;
 import io.dongtai.iast.core.handler.trace.Tracer;
 import io.dongtai.iast.core.service.ErrorLogReport;
 import io.dongtai.iast.core.utils.HttpClientUtils;
-import io.dongtai.iast.core.utils.matcher.ConfigMatcher;
 import io.dongtai.log.DongTaiLog;
 
 import java.io.File;
@@ -162,25 +160,9 @@ public class HttpImpl {
      *
      * @param event method call event
      */
-    public static void solveHttp(MethodEvent event)
-            throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
-        if (DongTaiLog.isDebugEnabled()) {
-            DongTaiLog.debug(EngineManager.SCOPE_TRACKER.get().toString());
-        }
-
+    public static void solveHttp(MethodEvent event) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
         Map<String, Object> requestMeta = getRequestMeta(event.argumentArray[0]);
-//        // todo Consider increasing the capture of html request responses
-//        if (ConfigMatcher.getInstance().disableExtension((String) requestMeta.get("requestURI"))) {
-//            return;
-//        }
-//        if (ConfigMatcher.getInstance().getBlackUrl(requestMeta)) {
-//            return;
-//        }
-//
-//        // todo: add custom header escape
-//        EngineManager.enterHttpEntry(requestMeta);
-        // fixme: replace with
-        Tracer.start(requestMeta);
+        Tracer.startHook(requestMeta);
 
         if (DongTaiLog.isDebugEnabled()) {
             DongTaiLog.debug("HTTP Request:{} {} from: {}", requestMeta.get("method"), requestMeta.get("requestURI"),

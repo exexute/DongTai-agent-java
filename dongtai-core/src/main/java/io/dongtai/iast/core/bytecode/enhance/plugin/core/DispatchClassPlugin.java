@@ -14,12 +14,13 @@ import io.dongtai.iast.core.handler.hookpoint.vulscan.VulnType;
 import io.dongtai.iast.core.utils.AsmUtils;
 import io.dongtai.iast.core.utils.matcher.Method;
 import io.dongtai.log.DongTaiLog;
-import java.lang.reflect.Modifier;
-import java.util.Arrays;
-import java.util.Set;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.commons.JSRInlinerAdapter;
+
+import java.lang.reflect.Modifier;
+import java.util.Arrays;
+import java.util.Set;
 
 /**
  * @author dongzhiyong@huoxian.cn

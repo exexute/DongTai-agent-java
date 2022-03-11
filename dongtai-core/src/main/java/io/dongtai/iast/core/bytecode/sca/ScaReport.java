@@ -1,8 +1,8 @@
 package io.dongtai.iast.core.bytecode.sca;
 
-import io.dongtai.iast.core.service.ErrorLogReport;
 import io.dongtai.iast.core.EngineManager;
 import io.dongtai.iast.core.handler.hookpoint.vulscan.ReportConstant;
+import io.dongtai.iast.core.service.ErrorLogReport;
 import io.dongtai.iast.core.utils.Constants;
 import io.dongtai.iast.core.utils.HttpClientUtils;
 import org.json.JSONObject;

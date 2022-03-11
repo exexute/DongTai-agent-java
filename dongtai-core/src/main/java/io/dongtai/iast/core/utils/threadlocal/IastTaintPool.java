@@ -1,9 +1,7 @@
 package io.dongtai.iast.core.utils.threadlocal;
 
-import io.dongtai.iast.core.EngineManager;
-import io.dongtai.iast.core.handler.trace.Tracer;
-import io.dongtai.iast.core.utils.PropertyUtils;
 import io.dongtai.iast.core.handler.hookpoint.models.MethodEvent;
+import io.dongtai.iast.core.handler.trace.Tracer;
 import io.dongtai.log.DongTaiLog;
 
 import java.util.HashSet;
@@ -14,8 +12,6 @@ import java.util.Set;
  * @author dongzhiyong@huoxian.cn
  */
 public class IastTaintPool extends ThreadLocal<HashSet<Object>> {
-
-    private static final PropertyUtils PROPERTIES = PropertyUtils.getInstance();
 
     @Override
     protected HashSet<Object> initialValue() {
@@ -39,18 +35,11 @@ public class IastTaintPool extends ThreadLocal<HashSet<Object>> {
                 event.addTargetHash(obj.hashCode());
 
                 String[] tempObjs = (String[]) obj;
-                if (PROPERTIES.isNormalMode()) {
-                    for (String tempObj : tempObjs) {
-                        this.get().add(tempObj);
-                        subHashCode = System.identityHashCode(tempObj);
-                        Tracer.getContext().getMethodTaintPool().add(subHashCode);
-                        event.addTargetHash(subHashCode);
-                    }
-                } else {
-                    for (String tempObj : tempObjs) {
-                        this.get().add(tempObj);
-                        event.addTargetHash(tempObj.hashCode());
-                    }
+                for (String tempObj : tempObjs) {
+                    this.get().add(tempObj);
+                    subHashCode = System.identityHashCode(tempObj);
+                    Tracer.getContext().getMethodTaintPool().add(subHashCode);
+                    event.addTargetHash(subHashCode);
                 }
             } else if (obj instanceof Map) {
                 this.get().add(obj);
@@ -76,7 +65,7 @@ public class IastTaintPool extends ThreadLocal<HashSet<Object>> {
                 }
             } else {
                 this.get().add(obj);
-                if (obj instanceof String && PROPERTIES.isNormalMode()) {
+                if (obj instanceof String) {
                     Tracer.getContext().getMethodTaintPool().add(System.identityHashCode(obj));
                 } else {
                     subHashCode = obj.hashCode();
@@ -97,7 +86,4 @@ public class IastTaintPool extends ThreadLocal<HashSet<Object>> {
         return this.get().isEmpty();
     }
 
-    public boolean isNotEmpty() {
-        return !this.get().isEmpty();
-    }
 }
