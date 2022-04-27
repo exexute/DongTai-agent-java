@@ -1,6 +1,7 @@
 package io.dongtai.iast.core.handler.trace;
 
 import com.alibaba.ttl.TransmittableThreadLocal;
+import io.dongtai.iast.core.handler.hookpoint.controller.TrackerHelper;
 import io.dongtai.iast.core.handler.hookpoint.models.MethodEvent;
 
 import java.util.HashMap;
@@ -12,17 +13,14 @@ public class Tracer {
     /**
      * fixme: 当前 threadLocal 变量存在不通线程中数据相同未发生变化的问题
      */
-    private static ThreadLocal<TraceContext> ttlContext = new TransmittableThreadLocal<TraceContext>() {
-        @Override
-        protected TraceContext initialValue() {
-            return new TraceContext();
-        }
-    };
+    private static ThreadLocal<TraceContext> ttlContext = new TransmittableThreadLocal<TraceContext>();
 
-    private static ThreadLocal<TraceContext> normalContext = new ThreadLocal<TraceContext>() {
+    private static ThreadLocal<TraceContext> normalContext = new ThreadLocal<TraceContext>();
+
+    private static ThreadLocal<TrackerHelper> traceState = new ThreadLocal<TrackerHelper>() {
         @Override
-        protected TraceContext initialValue() {
-            return new TraceContext();
+        protected TrackerHelper initialValue() {
+            return new TrackerHelper();
         }
     };
 
@@ -33,13 +31,15 @@ public class Tracer {
      */
     public static void startHook(Map<String, Object> requestMeta) {
         // todo: check with hook rule
-        TraceContext context = getContext();
+        TraceContext context = new TraceContext();
+        context.setTtlState(useTtl);
         context.setEntryState(1);
         context.setCollectState(true);
         context.setRequestMeta(requestMeta);
         context.setTraceMethodMap(new HashMap<Integer, MethodEvent>(1024));
         context.setMethodTaintPool(new HashSet<Object>());
         context.setMethodTaintSignature(new HashSet<Integer>());
+        getContextCarrie().set(context);
     }
 
     /**
@@ -65,6 +65,10 @@ public class Tracer {
      */
     private static ThreadLocal<TraceContext> getContextCarrie() {
         return useTtl ? ttlContext : normalContext;
+    }
+
+    public static TrackerHelper getTraceState() {
+        return traceState.get();
     }
 
 }

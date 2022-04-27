@@ -28,7 +28,7 @@ public class SpyDispatcherImpl implements SpyDispatcher {
     @Override
     public void enterHttp() {
         try {
-            Tracer.getContext().getTrackerHelper().enterHttp();
+            Tracer.getTraceState().enterHttp();
         } catch (Exception e) {
             ErrorLogReport.sendErrorLog(e);
         }
@@ -44,11 +44,11 @@ public class SpyDispatcherImpl implements SpyDispatcher {
     public void leaveHttp(Object request, Object response) {
         try {
             TraceContext context = Tracer.getContext();
-            if (context.supportCollect()) {
+            if (context != null && context.supportCollect()) {
                 context.stopCollect();
 
-                context.getTrackerHelper().leaveHttp();
-                if (context.isInEntry() && context.getTrackerHelper().isExitedHttp()) {
+                Tracer.getTraceState().leaveHttp();
+                if (context.isInEntry() && Tracer.getTraceState().isExitedHttp()) {
                     EngineManager.maintainRequestCount();
                     GraphBuilder.buildAndReport(request, response);
                     Tracer.end();
@@ -71,7 +71,7 @@ public class SpyDispatcherImpl implements SpyDispatcher {
     @Override
     public boolean isFirstLevelHttp() {
         try {
-            return EngineManager.isEngineRunning() && Tracer.getContext().getTrackerHelper().isFirstLevelHttp();
+            return EngineManager.isEngineRunning() && Tracer.getTraceState().isFirstLevelHttp();
         } catch (Exception e) {
             ErrorLogReport.sendErrorLog(e);
         }
@@ -112,7 +112,7 @@ public class SpyDispatcherImpl implements SpyDispatcher {
     @Override
     public void enterDubbo() {
         try {
-            Tracer.getContext().getTrackerHelper().enterDubbo();
+            Tracer.getTraceState().enterDubbo();
         } catch (Exception e) {
             ErrorLogReport.sendErrorLog(e);
         }
@@ -127,11 +127,11 @@ public class SpyDispatcherImpl implements SpyDispatcher {
     public void leaveDubbo() {
         try {
             TraceContext context = Tracer.getContext();
-            if (context.supportCollect()) {
+            if (context != null && context.supportCollect()) {
                 context.stopCollect();
 
-                context.getTrackerHelper().leaveDubbo();
-                if (context.getTrackerHelper().isExitedDubbo() && !context.isInEntry()) {
+                Tracer.getTraceState().leaveDubbo();
+                if (Tracer.getTraceState().isExitedDubbo() && !context.isInEntry()) {
                     EngineManager.maintainRequestCount();
                     GraphBuilder.buildAndReport(null, null);
                     Tracer.end();
@@ -154,8 +154,7 @@ public class SpyDispatcherImpl implements SpyDispatcher {
     @Override
     public boolean isFirstLevelDubbo() {
         try {
-            TraceContext context = Tracer.getContext();
-            return EngineManager.isEngineRunning() && context.getTrackerHelper().isFirstLevelDubbo();
+            return EngineManager.isEngineRunning() && Tracer.getTraceState().isFirstLevelDubbo();
         } catch (Exception e) {
             ErrorLogReport.sendErrorLog(e);
         }
@@ -170,7 +169,7 @@ public class SpyDispatcherImpl implements SpyDispatcher {
     @Override
     public void enterSource() {
         try {
-            Tracer.getContext().getTrackerHelper().enterSource();
+            Tracer.getTraceState().enterSource();
         } catch (Exception e) {
             ErrorLogReport.sendErrorLog(e);
         }
@@ -184,7 +183,7 @@ public class SpyDispatcherImpl implements SpyDispatcher {
     @Override
     public void leaveSource() {
         try {
-            Tracer.getContext().getTrackerHelper().leaveSource();
+            Tracer.getTraceState().leaveSource();
         } catch (Exception e) {
             ErrorLogReport.sendErrorLog(e);
         }
@@ -200,7 +199,7 @@ public class SpyDispatcherImpl implements SpyDispatcher {
     public boolean isFirstLevelSource() {
         try {
             TraceContext context = Tracer.getContext();
-            return EngineManager.isEngineRunning() && context.supportCollect() && context.getTrackerHelper().isFirstLevelSource();
+            return context != null && EngineManager.isEngineRunning() && context.supportCollect() && Tracer.getTraceState().isFirstLevelSource();
         } catch (Exception e) {
             return false;
         }
@@ -214,7 +213,7 @@ public class SpyDispatcherImpl implements SpyDispatcher {
     @Override
     public void enterPropagator() {
         try {
-            Tracer.getContext().getTrackerHelper().enterPropagation();
+            Tracer.getTraceState().enterPropagation();
         } catch (Exception e) {
             ErrorLogReport.sendErrorLog(e);
         }
@@ -228,7 +227,7 @@ public class SpyDispatcherImpl implements SpyDispatcher {
     @Override
     public void leavePropagator() {
         try {
-            Tracer.getContext().getTrackerHelper().leavePropagation();
+            Tracer.getTraceState().leavePropagation();
         } catch (Exception e) {
             ErrorLogReport.sendErrorLog(e);
         }
@@ -243,7 +242,7 @@ public class SpyDispatcherImpl implements SpyDispatcher {
     @Override
     public boolean isFirstLevelPropagator() {
         try {
-            return EngineManager.isEngineRunning() && Tracer.getContext().getTrackerHelper().isFirstLevelPropagator();
+            return EngineManager.isEngineRunning() && Tracer.getTraceState().isFirstLevelPropagator();
         } catch (Exception e) {
             return false;
         }
@@ -257,7 +256,7 @@ public class SpyDispatcherImpl implements SpyDispatcher {
     @Override
     public void enterSink() {
         try {
-            Tracer.getContext().getTrackerHelper().enterSink();
+            Tracer.getTraceState().enterSink();
         } catch (Exception e) {
             ErrorLogReport.sendErrorLog(e);
         }
@@ -271,7 +270,7 @@ public class SpyDispatcherImpl implements SpyDispatcher {
     @Override
     public void leaveSink() {
         try {
-            Tracer.getContext().getTrackerHelper().leaveSink();
+            Tracer.getTraceState().leaveSink();
         } catch (Exception e) {
             ErrorLogReport.sendErrorLog(e);
         }
@@ -286,7 +285,7 @@ public class SpyDispatcherImpl implements SpyDispatcher {
     @Override
     public boolean isFirstLevelSink() {
         try {
-            return EngineManager.isEngineRunning() && Tracer.getContext().getTrackerHelper().isFirstLevelSink();
+            return EngineManager.isEngineRunning() && Tracer.getTraceState().isFirstLevelSink();
         } catch (Exception e) {
             return false;
         }
@@ -313,7 +312,7 @@ public class SpyDispatcherImpl implements SpyDispatcher {
                                      String className, String matchClassName, String methodName, String methodSign, boolean isStatic,
                                      int hookType) {
         TraceContext context = Tracer.getContext();
-        boolean supportCollect = context.supportCollect();
+        boolean supportCollect = context != null && context.supportCollect();
 
         if (supportCollect || (HookType.HTTP.equals(hookType) || HookType.DUBBO.equals(hookType))) {
             try {
@@ -328,7 +327,7 @@ public class SpyDispatcherImpl implements SpyDispatcher {
                         SpringApplicationImpl.getWebApplicationContext(event);
                     }
                 } else {
-                    boolean isEnterEntryPoint = context.isInEntry() || context.getTrackerHelper().isFirstLevelDubbo();
+                    boolean isEnterEntryPoint = (context != null && context.isInEntry()) || Tracer.getTraceState().isFirstLevelDubbo();
                     boolean isEntryPointMethod = HookType.HTTP.equals(hookType) || HookType.DUBBO.equals(hookType);
                     if (isEnterEntryPoint || isEntryPointMethod) {
                         MethodEvent event = new MethodEvent(0, -1, className, matchClassName, methodName,
@@ -337,11 +336,11 @@ public class SpyDispatcherImpl implements SpyDispatcher {
                             HttpImpl.solveHttp(event);
                         } else if (HookType.DUBBO.equals(hookType)) {
                             DubboImpl.solveDubbo(event, INVOKE_ID_SEQUENCER);
-                        } else if (HookType.PROPAGATOR.equals(hookType) && !context.getMethodTaintPool().isEmpty()) {
+                        } else if (HookType.PROPAGATOR.equals(hookType) && context != null && !context.getMethodTaintPool().isEmpty()) {
                             PropagatorImpl.solvePropagator(event, INVOKE_ID_SEQUENCER);
                         } else if (HookType.SOURCE.equals(hookType)) {
                             SourceImpl.solveSource(event, INVOKE_ID_SEQUENCER);
-                        } else if (HookType.SINK.equals(hookType) && !context.getMethodTaintPool().isEmpty()) {
+                        } else if (HookType.SINK.equals(hookType) && context != null && !context.getMethodTaintPool().isEmpty()) {
                             SinkImpl.solveSink(event);
                         }
                     }
